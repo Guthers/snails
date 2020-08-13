@@ -7,6 +7,7 @@ Uses:
 - [TailwindCSS](https://tailwindcss.com)
 - [TypeScript](https://www.typescriptlang.org)
 
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -19,7 +20,9 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.
 
-### `npm run build:css`
+⚠️  Editing `src/tailwind.css` will require a **manual** [rebuild](#npm-run-build:css).
+
+### [`npm run build:css`](#npm-run-build:css)
 
 Build the CSS from `src/tailwind.css` to `src/style.css`.
 
