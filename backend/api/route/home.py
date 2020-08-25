@@ -3,6 +3,8 @@ from flask import Blueprint
 from flasgger import swag_from
 from api.model.welcome import WelcomeModel
 from api.schema.welcome import WelcomeSchema
+import api.model.models as models
+import api.schema.schemas as schemas
 
 home_api = Blueprint('api', __name__)
 
@@ -24,3 +26,21 @@ def welcome():
     """
     result = WelcomeModel()
     return WelcomeSchema().dump(result), 200
+
+@home_api.route('/user')
+@swag_from({
+    'responses': {
+        HTTPStatus.OK.value: {
+            'description': 'This actually hurts',
+            'schema': schemas.UserSchema
+        }
+    }
+})
+def user():
+    """
+    1 liner about the route
+    A more detailed description of the endpoint
+    ---
+    """
+    result = models.UserModel()
+    return schemas.UserSchema().dump(result), 200
