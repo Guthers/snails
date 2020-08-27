@@ -16,4 +16,4 @@ from .api_register import api_register
 })
 def weather():
     result = models.WeatherModel()
-    return models.WeatherModel.schema().dump(result), 200
+    return models.WeatherModelschema()().jsonify(result), 200

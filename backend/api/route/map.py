@@ -16,7 +16,7 @@ from .api_register import api_register
 })
 def maps():
     result = models.MapModel()
-    return models.MapModel.schema().dump(result), 200
+    return models.MapModelschema()().jsonify(result), 200
 
 
 @api_register.route('/maps/<int:mapsID>', methods=["GET"])
@@ -37,4 +37,4 @@ def maps():
 })
 def maps_id(mapsID: int):
     result = None  # TODO FIX
-    return models.MapModel.schema().dump(result), 200
+    return models.MapModelschema()().jsonify(result), 200

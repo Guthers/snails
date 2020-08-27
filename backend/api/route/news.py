@@ -16,7 +16,7 @@ from .api_register import api_register
 })
 def news():
     result = models.NewsModel()
-    return models.NewsModel.schema().dump(result), 200
+    return models.NewsModelschema()().jsonify(result), 200
 
 
 @api_register.route('/news/<int:newsID>', methods=["GET"])
@@ -37,4 +37,4 @@ def news():
 })
 def news_id(newsID: int):
     result = None  # TODO FIX
-    return models.NewsModel.schema().dump(result), 200
+    return models.NewsModelschema()().jsonify(result), 200

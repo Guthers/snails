@@ -16,7 +16,7 @@ from .api_register import api_register
 })
 def user():
     result = models.UserModel()
-    return models.UserModel.schema().dump(result), 200
+    return models.UserModelschema()().jsonify(result), 200
 
 
 @api_register.route('/user/<int:userID>', methods=["GET"])
@@ -38,7 +38,7 @@ def user():
 def user_id(userID: int):
     from datetime import datetime
     result = models.UserModel(datetime.now(), "Foobar", "barson", userID)
-    return models.UserModel.schema().dump(result), 200
+    return result.schema()().jsonify(result), 200
 
 
 @api_register.route('/user/<int:userID>/messages', methods=["GET"])
@@ -59,4 +59,4 @@ def user_id(userID: int):
 })
 def user_message(userId: int):
     result = models.MessageModel()
-    return models.MessageModel.schema().dump(result), 200
+    return models.MessageModelschema()().jsonify(result), 200
