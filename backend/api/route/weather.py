@@ -9,7 +9,7 @@ from .api_register import api_register
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'This is actually weather',
-            'schema': models.WeatherModel.WeatherSchema
+            'schema': models.WeatherModel.schema()
         }
     }
 })
@@ -20,4 +20,4 @@ def weather():
     ---
     """
     result = models.WeatherModel()
-    return models.WeatherModel.WeatherSchema().dump(result), 200
+    return models.WeatherModel.schema().dump(result), 200
