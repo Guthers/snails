@@ -16,7 +16,7 @@ from .api_register import api_register
 })
 def transport():
     result = models.VehicleModel()
-    return models.VehicleModelschema()().jsonify(result), 200
+    return models.VehicleModel.schema()().jsonify(result), 200
 
 
 @api_register.route('/transport/<int:transportID>', methods=["GET"])
@@ -37,4 +37,4 @@ def transport():
 })
 def transport_id(transportID: int):
     result = None  # TODO FIX
-    return models.VehicleModelschema()().jsonify(result), 200
+    return models.VehicleModel.schema()().jsonify(result), 200

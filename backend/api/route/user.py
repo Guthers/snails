@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from utils.api_utils import safe_fail
 from flasgger import swag_from
 import api.model as models
 from .api_register import api_register
@@ -16,7 +17,7 @@ from .api_register import api_register
 })
 def user():
     result = models.UserModel()
-    return models.UserModelschema()().jsonify(result), 200
+    return models.UserModel.schema()().jsonify(result), 200
 
 
 @api_register.route('/user/<int:userID>', methods=["GET"])
@@ -57,6 +58,7 @@ def user_id(userID: int):
         }
     }
 })
-def user_message(userId: int):
+@safe_fail
+def user_message(userID: int):
     result = models.MessageModel()
-    return models.MessageModelschema()().jsonify(result), 200
+    return models.MessageModel.schema()().dump(result), 200

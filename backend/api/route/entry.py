@@ -16,7 +16,7 @@ from .api_register import api_register
 })
 def entry():
     result = models.EntryModel()
-    return models.EntryModelschema()().jsonify(result), 200
+    return models.EntryModel.schema()().jsonify(result), 200
 
 
 @api_register.route('/entry/<int:entryID>', methods=["GET"])
@@ -37,7 +37,7 @@ def entry():
 })
 def entry_id(entryID: int):
     result = models.EntryModel()
-    return models.EntryModelschema()().jsonify(result), 200
+    return models.EntryModel.schema()().jsonify(result), 200
 
 
 @api_register.route('/entry/<int:entryID>/replies', methods=["GET"])
@@ -58,7 +58,7 @@ def entry_id(entryID: int):
 })
 def entry_id_replies(entryID: int):
     result = models.EntryModel()
-    return models.EntryModelschema()().jsonify(result), 200  # TODO Schema is wrong
+    return models.EntryModel.schema()().jsonify(result), 200  # TODO Schema is wrong
 
 
 @api_register.route('/entry/like/<int:entryID>', methods=["POST"])
@@ -79,7 +79,7 @@ def entry_id_replies(entryID: int):
 })
 def like_entry(entryID: int):
     result = models.EntryModel()
-    return models.EntryModelschema()().jsonify(result), 200  # TODO Schema is wrong
+    return models.EntryModel.schema()().jsonify(result), 200  # TODO Schema is wrong
 
 
 @api_register.route('/entry/unlike/<int:entryID>', methods=["POST"])
@@ -100,7 +100,7 @@ def like_entry(entryID: int):
 })
 def unlike_entry(entryID: int):
     result = models.EntryModel()
-    return models.EntryModelschema()().jsonify(result), 200  # TODO Schema is wrong
+    return models.EntryModel.schema()().jsonify(result), 200  # TODO Schema is wrong
 
 
 @api_register.route('/entry/<int:entryID>', methods=["DELETE"])
@@ -121,4 +121,4 @@ def unlike_entry(entryID: int):
 })
 def delete_entry(entryID: int):
     result = models.EntryModel()
-    return models.EntryModelschema()().jsonify(result), 200  # TODO Schema is wrong
+    return models.EntryModel.schema()().jsonify(result), 200  # TODO Schema is wrong

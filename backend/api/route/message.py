@@ -22,7 +22,7 @@ from .api_register import api_register
 })
 def message_id_get(messageID: int):
     result = None  # TODO FIX
-    return models.MessageModelschema()().jsonify(result), 200
+    return models.MessageModel.schema()().jsonify(result), 200
 
 
 @api_register.route('/message/<int:userID>', methods=["POST"])
@@ -43,4 +43,4 @@ def message_id_get(messageID: int):
 })
 def message_id_send(userID: int):
     result = None  # TODO FIX
-    return models.MessageModelschema()().jsonify(result), 200
+    return models.MessageModel.schema()().jsonify(result), 200
