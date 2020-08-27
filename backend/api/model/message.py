@@ -1,14 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from flask_marshmallow import Schema
-import marshmallow as ma
+from .abstract_model import AbstractModel
 
 
 if TYPE_CHECKING:
     from api.model.user import UserModel
 
 
-class MessageModel:
+class MessageModel(AbstractModel):
     def __init__(self, created_at: str = None, to: UserModel = None,
                  _from: UserModel = None, content: str = None,
                  message_id: str = None):
@@ -30,10 +29,3 @@ class MessageModel:
         self._from = _from
         self.content = content
         self.message_id = message_id
-
-    class MessageSchema(Schema):
-        created_at = ma.fields.DateTime()
-        to = ma.fields.Str()
-        _from = ma.fields.Str()
-        content = ma.fields.Str()
-        message_id = ma.fields.Str()

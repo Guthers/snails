@@ -1,8 +1,7 @@
-from flask_marshmallow import Schema
-import marshmallow as ma
+from .abstract_model import AbstractModel
 
 
-class NewsModel:
+class NewsModel(AbstractModel):
     def __init__(self, created_at: str = None, url: str = None, content:
                  str = None, image_url: str = None, news_id: str = None, title: str = None):
         """News - a model defined in Swagger
@@ -26,11 +25,3 @@ class NewsModel:
         self.image_url = image_url
         self.news_id = news_id
         self.title = title
-
-    class NewsSchema(Schema):
-        created_at = ma.fields.DateTime()
-        url = ma.fields.URL()
-        content = ma.fields.Str()
-        image_url = ma.fields.URL()
-        news_id = ma.fields.Str()
-        title = ma.fields.Str()
