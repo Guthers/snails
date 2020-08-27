@@ -1,7 +1,9 @@
+from __future__ import annotations
 from flask_marshmallow import Schema
 import marshmallow as ma
 from datetime import datetime
 from inspect import signature
+from typing import Type
 
 
 class AbstractModel():
@@ -17,12 +19,31 @@ class AbstractModel():
     }
 
     @classmethod
-    def schema(calling_class):
-        schema_name = calling_class.__name__ + "Schema"
+    def schema(cls: Type[AbstractModel]) -> Schema:
+        """
+            Automatically generates the swagger scheam for classes which inherit
+            the abstract class. It uses the classes __init__ function, combined
+            with the type annotations.
+
+            If no type annotation is supplied, it is assumed string. If it is
+            provided then it is checked against the AbstractModel.type_mapper.
+            This will throw a KeyError. Which is okay, as this function is run
+            when the api is being registered, which happens on startup (fail
+            fast, fail often, fail hard).
+
+            :param cls: The subclass which inherits AbstractModel.
+            :type cls: Subclass of AbstractModel
+
+        """
+        schema_name = cls.__name__
+        if "Model" in schema_name:
+            schema_name = cls.__name__.replace("Model", "Schema")
+        else:
+            schema_name += "Schema"
 
         params = {}
 
-        init_params = signature(calling_class.__init__)
+        init_params = signature(cls.__init__)
 
         for param in init_params.parameters:
             if param != "self":
