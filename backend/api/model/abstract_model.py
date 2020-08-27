@@ -1,4 +1,3 @@
-from __future__ import annotations
 from utils.class_utils import get_abstract_subclasses
 from flask_marshmallow import Schema
 import marshmallow as ma
@@ -10,7 +9,7 @@ class AbstractModel():
         - Namely auto-generation of schemas
     """
     @classmethod
-    def schema(cls: typing.Type[AbstractModel]) -> Schema:
+    def schema(cls) -> Schema:
         """
             Automatically generates the swagger scheam for classes which inherit
             the abstract class. It uses the classes __init__ function, combined
