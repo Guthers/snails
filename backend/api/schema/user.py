@@ -6,4 +6,4 @@ class UserSchema(Schema):
     created_at = ma.fields.DateTime()
     username = ma.fields.Str()
     name = ma.fields.Str()
-    user_id = ma.fields.Str()
+    user_id = ma.fields.Int()

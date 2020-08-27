@@ -3,3 +3,4 @@ from .api_register import api_register
 
 import api.route.home
 import api.route.user
+import api.route.weather
