@@ -48,9 +48,6 @@ class AbstractModel():
         for param in init_params.parameters:
             if param != "self":
                 type_annotation = init_params.parameters[param].annotation
-
-                print(f"param: {param} has type {type_annotation}")
-
                 if type_annotation is None:
                     type_annotation = str
                 params[param] = AbstractModel.type_mapper[type_annotation]
