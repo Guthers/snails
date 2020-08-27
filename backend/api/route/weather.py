@@ -4,8 +4,9 @@ import api.model as models
 from .api_register import api_register
 
 
-@api_register.route('/weather')
+@api_register.route('/weather', methods=["GET"])
 @swag_from({
+    'tags': ['Weather'],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'This is actually weather',

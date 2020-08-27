@@ -14,3 +14,12 @@ Visit http://localhost/api for the home api
 Visit http://localhost/apidocs for the swagger documentation
 ### Run Tests
 `pipenv run python -m unittest`
+
+
+### To Enable hot reload
+Add a file `./.env` with the following lines
+
+FLASK_APP=app.py
+FLASK_ENV=development
+
+Then run the code as normal

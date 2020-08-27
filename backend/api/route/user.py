@@ -4,8 +4,9 @@ import api.model as models
 from .api_register import api_register
 
 
-@api_register.route('/user')
+@api_register.route('/user', methods=["POST"])
 @swag_from({
+    'tags': ['User'],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'This actually hurts',
@@ -23,8 +24,9 @@ def user():
     return models.UserModel.schema().dump(result), 200
 
 
-@api_register.route('/user/<int:userID>')
+@api_register.route('/user/<int:userID>', methods=["GET"])
 @swag_from({
+    'tags': ['User'],
     'parameters': [{
         'in': 'path',
         'name': 'userID',
