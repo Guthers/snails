@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from flasgger import swag_from
 import api.model as models
-import api.schema as schemas
 from .api_register import api_register
 
 
@@ -10,7 +9,7 @@ from .api_register import api_register
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'This is actually weather',
-            'schema': schemas.WeatherSchema
+            'schema': models.WeatherModel.WeatherSchema
         }
     }
 })
@@ -21,4 +20,4 @@ def weather():
     ---
     """
     result = models.WeatherModel()
-    return schemas.WeatherSchema().dump(result), 200
+    return models.WeatherModel.WeatherSchema().dump(result), 200

@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from flasgger import swag_from
 import api.model as models
-import api.schema as schemas
 from .api_register import api_register
 
 
@@ -10,7 +9,7 @@ from .api_register import api_register
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'This actually hurts',
-            'schema': schemas.UserSchema
+            'schema': models.UserModel.UserSchema
         }
     }
 })
@@ -21,7 +20,7 @@ def user():
     ---
     """
     result = models.UserModel()
-    return schemas.UserSchema().dump(result), 200
+    return models.UserModel.UserSchema().dump(result), 200
 
 
 @api_register.route('/user/<int:userID>')
@@ -35,7 +34,7 @@ def user():
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'This actually hurts',
-            'schema': models.UserModel.Schema
+            'schema': models.UserModel.UserSchema
         }
     }
 })
@@ -47,4 +46,4 @@ def user_id(userID: int):
     """
     from datetime import datetime
     result = models.UserModel(datetime.now(), "Foobar", "barson", userID)
-    return schemas.UserSchema().dump(result), 200
+    return models.UserModel.UserSchema().dump(result), 200

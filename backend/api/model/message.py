@@ -1,5 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from flask_marshmallow import Schema
+import marshmallow as ma
+
 
 if TYPE_CHECKING:
     from api.model.user import UserModel
@@ -27,3 +30,10 @@ class MessageModel:
         self._from = _from
         self.content = content
         self.message_id = message_id
+
+    class MessageSchema(Schema):
+        created_at = ma.fields.DateTime()
+        to = ma.fields.Str()
+        _from = ma.fields.Str()
+        content = ma.fields.Str()
+        message_id = ma.fields.Str()

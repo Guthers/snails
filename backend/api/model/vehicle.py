@@ -1,3 +1,7 @@
+from flask_marshmallow import Schema
+import marshmallow as ma
+
+
 class VehicleModel:
     def __init__(self, eta: int = None, name: str = None, code: str = None):
         """Vehicle - a model defined in Swagger
@@ -12,3 +16,8 @@ class VehicleModel:
         self.eta = eta
         self.name = name
         self.code = code
+
+    class VehicleSchema(Schema):
+        eta = ma.fields.Integer()
+        name = ma.fields.Str()
+        code = ma.fields.Str()

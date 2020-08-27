@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from flasgger import swag_from
 from api.model.welcome import WelcomeModel
-from api.schema.welcome import WelcomeSchema
 from .api_register import api_register
 
 
@@ -10,7 +9,7 @@ from .api_register import api_register
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Welcome to the Flask Starter Kit',
-            'schema': WelcomeSchema
+            'schema': WelcomeModel.WelcomeSchema
         }
     }
 })
@@ -21,4 +20,4 @@ def welcome():
     ---
     """
     result = WelcomeModel()
-    return WelcomeSchema().dump(result), 200
+    return WelcomeModel.WelcomeSchema().dump(result), 200

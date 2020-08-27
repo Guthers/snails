@@ -1,5 +1,8 @@
 from __future__ import annotations
 from typing import List, TYPE_CHECKING
+from flask_marshmallow import Schema
+import marshmallow as ma
+
 
 if TYPE_CHECKING:
     from api.model.user import UserModel
@@ -34,3 +37,12 @@ class EntryModel:
         self.replies = replies
         self.author = author
         self.entry_id = entry_id
+
+    class EntrySchema(Schema):
+        created_at = ma.fields.DateTime()
+        reply_to = ma.fields.Str()
+        content = ma.fields.Str()
+        liked_by = ma.fields.List(ma.fields.Str())
+        replies = ma.fields.List(ma.fields.Str())
+        author = ma.fields.Str()
+        entry_id = ma.fields.Str()

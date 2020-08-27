@@ -1,3 +1,7 @@
+from flask_marshmallow import Schema
+import marshmallow as ma
+
+
 class WeatherModel:
     def __init__(self, created_at: str = None, current_temperature: int = None,
                  precipitation: float = None, humidity: float = None,
@@ -30,3 +34,13 @@ class WeatherModel:
         self.conditions = conditions
         self.max_temperature = max_temperature
         self.min_temperature = min_temperature
+
+    class WeatherSchema(Schema):
+        created_at = ma.fields.DateTime()
+        current_temperature = ma.fields.Integer()
+        precipitation = ma.fields.Float()
+        humidity = ma.fields.Float()
+        uv_index = ma.fields.Integer()
+        conditions = ma.fields.Str()
+        max_temperature = ma.fields.Integer()
+        min_temperature = ma.fields.Integer()
