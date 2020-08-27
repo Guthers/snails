@@ -1,9 +1,8 @@
+from .abstract_model import AbstractModel
 from datetime import datetime
-from flask_marshmallow import Schema
-import marshmallow as ma
 
 
-class UserModel:
+class UserModel(AbstractModel):
     def __init__(self, created_at: datetime = None, username: str = None,
                  name: str = None, user_id: int = None):
         """User - a model defined in Swagger
@@ -21,9 +20,3 @@ class UserModel:
         self.username = username
         self.name = name
         self.user_id = user_id
-
-    class UserSchema(Schema):
-        created_at = ma.fields.DateTime()
-        username = ma.fields.Str()
-        name = ma.fields.Str()
-        user_id = ma.fields.Int()
