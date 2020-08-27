@@ -1,8 +1,9 @@
 from .abstract_model import AbstractModel
+from datetime import datetime
 
 
 class NewsModel(AbstractModel):
-    def __init__(self, created_at: str = None, url: str = None, content:
+    def __init__(self, created_at: datetime = None, url: str = None, content:
                  str = None, image_url: str = None, news_id: str = None, title: str = None):
         """News - a model defined in Swagger
 

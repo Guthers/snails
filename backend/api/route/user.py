@@ -15,11 +15,6 @@ from .api_register import api_register
     }
 })
 def user():
-    """
-    1 liner about the route
-    A more detailed description of the endpoint
-    ---
-    """
     result = models.UserModel()
     return models.UserModel.schema().dump(result), 200
 
@@ -41,11 +36,27 @@ def user():
     }
 })
 def user_id(userID: int):
-    """
-    1 liner about the route
-    A more detailed description of the endpoint
-    ---
-    """
     from datetime import datetime
     result = models.UserModel(datetime.now(), "Foobar", "barson", userID)
     return models.UserModel.schema().dump(result), 200
+
+
+@api_register.route('/user/<int:userID>/messages', methods=["GET"])
+@swag_from({
+    'tags': ['User'],
+    'parameters': [{
+        'in': 'path',
+        'name': 'userID',
+        'type': 'int',
+        'required': 'true'
+    }],
+    'responses': {
+        HTTPStatus.OK.value: {
+            'description': 'Get a users messages',
+            'schema': models.MessageModel.schema()
+        }
+    }
+})
+def user_message(userId: int):
+    result = models.MessageModel()
+    return models.MessageModel.schema().dump(result), 200

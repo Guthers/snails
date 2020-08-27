@@ -9,16 +9,11 @@ from .api_register import api_register
     'tags': ['Weather'],
     'responses': {
         HTTPStatus.OK.value: {
-            'description': 'This is actually weather',
+            'description': 'Gets the current weather information',
             'schema': models.WeatherModel.schema()
         }
     }
 })
 def weather():
-    """
-    1 liner about the route
-    A more detailed description of the endpoint
-    ---
-    """
     result = models.WeatherModel()
     return models.WeatherModel.schema().dump(result), 200

@@ -1,14 +1,10 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
 from .abstract_model import AbstractModel
-
-
-if TYPE_CHECKING:
-    from api.model.user import UserModel
+from datetime import datetime
+from api.model.user import UserModel
 
 
 class MessageModel(AbstractModel):
-    def __init__(self, created_at: str = None, to: UserModel = None,
+    def __init__(self, created_at: datetime = None, to: UserModel = None,
                  _from: UserModel = None, content: str = None,
                  message_id: str = None):
         """Message - a model defined in Swagger

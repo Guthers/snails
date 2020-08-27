@@ -4,3 +4,4 @@ from .news import NewsModel
 from .user import UserModel
 from .vehicle import VehicleModel
 from .weather import WeatherModel
+from .map import MapModel

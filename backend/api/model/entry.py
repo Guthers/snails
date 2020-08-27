@@ -1,14 +1,11 @@
-from __future__ import annotations
-from typing import List, TYPE_CHECKING
+from typing import List
 from .abstract_model import AbstractModel
-
-
-if TYPE_CHECKING:
-    from api.model.user import UserModel
+from datetime import datetime
+from .user import UserModel
 
 
 class EntryModel(AbstractModel):
-    def __init__(self, created_at: str = None, reply_to: str = None,
+    def __init__(self, created_at: datetime = None, reply_to: str = None,
                  content: str = None, liked_by: List[UserModel] = None,
                  replies: List[str] = None, author: UserModel = None,
                  entry_id: str = None):

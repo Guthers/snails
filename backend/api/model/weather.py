@@ -1,8 +1,9 @@
 from .abstract_model import AbstractModel
+from datetime import datetime
 
 
 class WeatherModel(AbstractModel):
-    def __init__(self, created_at: str = None, current_temperature: int = None,
+    def __init__(self, created_at: datetime = None, current_temperature: int = None,
                  precipitation: float = None, humidity: float = None,
                  uv_index: int = None, conditions: str = None,
                  max_temperature: int = None, min_temperature: int = None):
