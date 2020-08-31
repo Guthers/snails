@@ -18,7 +18,7 @@ CREATE TABLE USER (
 );
 
 /*Table that stores an entry/post information*/
-CREATE TABLE ENTRY (
+CREATE TABLE EPOST (
   postID INT NOT NULL,
   authorID INT,
   content VARCHAR(225 BYTE),
