@@ -24,7 +24,7 @@ CREATE TABLE MESSAGE (
 /*Creates a table to store post information*/
 CREATE TABLE POST (
   postID INT;
-  messageContent VARCHAR(225 BYTE),
+  postContent VARCHAR(225 BYTE),
   createDate VARCHAR(225 BYTE),
   getUserId VARCHAR(225 BYTE),        //Get the user who posted the message
   getUserResponses VARCHAR(225 BYTE)  //Get all the users who responded
