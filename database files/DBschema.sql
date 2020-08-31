@@ -1,4 +1,4 @@
-/*Tables for the database*/
+/*Tables for the database: USER, ENTRY (POSTS), MESSAGE*/
 
 
 /*Creates a table to user informtation*/
@@ -10,10 +10,21 @@ CREATE TABLE USER (
   userCreateDate VARCHAR(225 BYTE),
 );
 
+/*Creates a table to store an entry (post) information*/
+CREATE TABLE ENTRY(
+  postID INT PRIMARY KEY,
+  postContent VARCHAR(225 BYTE),
+  createDate VARCHAR(225 BYTE),
+  getAuthorID INT,
+  getAuthor VARCHAR(225 BYTE),         //Get the author of the post
+  getUserResponses VARCHAR(225 BYTE),  //Get all the users who wrote a response
+  LikedBy VARCHAR(225 BYTE),           //Get all the users who liked the post
+);
 
-/*Creates a table to store message information*/
+
+/*Creates a table to store private messaging information*/
 CREATE TABLE MESSAGE (
-  messageID INT;
+  messageID INT PRIMARY KEY;
   messageContent VARCHAR(225 BYTE),
   createDate VARCHAR(225 BYTE),
   getFromUserID VARCHAR(225 BYTE),        //Get the user who sent the message
@@ -21,14 +32,6 @@ CREATE TABLE MESSAGE (
 );
 
 
-/*Creates a table to store post information*/
-CREATE TABLE POST (
-  postID INT;
-  postContent VARCHAR(225 BYTE),
-  createDate VARCHAR(225 BYTE),
-  getUserId VARCHAR(225 BYTE),        //Get the user who posted the message
-  getUserResponses VARCHAR(225 BYTE)  //Get all the users who responded
-  
-);
+
 
 
