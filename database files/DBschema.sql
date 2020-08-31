@@ -10,40 +10,47 @@ LikedBy VARCHAR(225 BYTE)              //Get all the users who liked the post
 
 /*Table that stores user informtation*/
 CREATE TABLE USER (
-  studentID INT PRIMARY KEY,
+  studentID INT NOT NULL,
   name VARCHAR(225 BYTE),
   bio VARCHAR(225 BYTE),
   userCreateDate VARCHAR(225 BYTE)
+  PRIMARY KEY (studentID)
 );
 
 /*Table that stores an entry/post information*/
 CREATE TABLE ENTRY (
-  postID INT PRIMARY KEY,
-  postContent VARCHAR(225 BYTE),
-  createDate DATE,
-  getAuthorID INT,                        /*Get the authorID of the post*/
-  getAuthor VARCHAR(225 BYTE),           
+  postID INT NOT NULL,
+  authorID INT,
+  content VARCHAR(225 BYTE),
+  createDate DATE,                        
+  PRIMARY KEY (postID),
+  FORIEGN KEY (authorID) REFERENCES USER(studentID)
 );
 
 
 /*Table to store private messaging information*/
 CREATE TABLE MESSAGE (
-  messageID INT PRIMARY KEY;
+  messageID INT NOT NULL;
   messageContent VARCHAR(225 BYTE),
   createDate DATE,
-  FromUserID INT,                        /*Get userID who sent the message*/
-  ToUserID INT,                          /*Get userID who received the message*/
-  FromUserName VARCHAR(225 BYTE),        /*Get userName who sent the message*/
-  ToUserName VARCHAR(225 BYTE)           /*Get userName who received the message*/
+  fromUserID INT,                        /*Get userID who sent the message*/
+  toUserID INT,                          /*Get userID who received the message*/
+  PRIMARY KEY (messageID),
+  FORIEGN KEY (fromUserID) REFERENCES USER(studentID)
+  FORIEGN KEY (toUserID) REFERENCES USER(studentID)
 );
 
 /*Table to store a reply:
 This allows us to get all responses to a post*/
 CREATE TABLE REPLY (
+  replyID INT NOT NULL,
   postID INT,
   userID INT,
   createDate DATE,
   RepliedToName VARCHAR(225 BYTE)
+  PRIMARY KEY (replyID),
+  FORIEGN KEY (postID) REFERENCES POST(postID)
+  FORIEGN KEY (userID) REFERENCES USER(studentID)
 );
 
 /*Table to store a reply:
@@ -51,7 +58,9 @@ This allows us to get all people who liked a post*/
 CREATE TABLE LIKED (
   postID INT,
   UserID INT,
-  createDate DATE
+  createDate DATE,
+  FORIEGN KEY (postID) REFERENCES POST(postID)
+  FORIEGN KEY (userID) REFERENCES USER(studentID)
 );
 
 
