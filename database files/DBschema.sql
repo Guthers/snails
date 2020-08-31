@@ -11,7 +11,7 @@ LikedBy VARCHAR(225 BYTE)              //Get all the users who liked the post
 /*Table that stores user informtation*/
 CREATE TABLE USER (
   studentID INT NOT NULL,
-  name VARCHAR(225 BYTE),
+  studentName VARCHAR(225 BYTE),
   bio VARCHAR(225 BYTE),
   userCreateDate VARCHAR(225 BYTE)
   PRIMARY KEY (studentID)
@@ -22,7 +22,8 @@ CREATE TABLE ENTRY (
   postID INT NOT NULL,
   authorID INT,
   content VARCHAR(225 BYTE),
-  createDate DATE,                        
+  createDate DATE,
+  likeCount INT,
   PRIMARY KEY (postID),
   FORIEGN KEY (authorID) REFERENCES USER(studentID)
 );
