@@ -73,7 +73,7 @@ class AbstractModel():
         if localised_annotation not in ma.Schema.TYPE_MAPPING:
             sub_classes = get_abstract_subclasses([AbstractModel])
             if localised_annotation in sub_classes:
-                return ma.fields.List(ma.fields.Nested(localised_annotation.schema()))
+                return ma.fields.Nested(localised_annotation.schema())
 
         # TODO Check for list as well
         return ma.Schema.TYPE_MAPPING[localised_annotation]()
