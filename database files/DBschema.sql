@@ -34,7 +34,7 @@ CREATE TABLE UMESSAGE (
   fromUserID INT,                        /*Get userID who sent the message*/
   toUserID INT,                          /*Get userID who received the message*/
   PRIMARY KEY (messageID),
-  FOREIGN KEY (fromUserID) REFERENCES USER(studentID)
+  FOREIGN KEY (fromUserID) REFERENCES USER(studentID),
   FOREIGN KEY (toUserID) REFERENCES USER(studentID)
 );
 
@@ -47,7 +47,7 @@ CREATE TABLE REPLY (
   createDate DATE,
   RepliedToName VARCHAR(225 BYTE)
   PRIMARY KEY (replyID),
-  FOREIGN KEY (postID) REFERENCES POST(postID)
+  FOREIGN KEY (postID) REFERENCES POST(postID),
   FOREIGN KEY (userID) REFERENCES USER(studentID)
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE LIKED (
   postID INT,
   UserID INT,
   createDate DATE,
-  FOREIGN KEY (postID) REFERENCES POST(postID)
+  FOREIGN KEY (postID) REFERENCES POST(postID),
   FOREIGN KEY (userID) REFERENCES USER(studentID)
 );
 
