@@ -30,7 +30,7 @@ CREATE TABLE EPOST (
 
 
 /*Table to store private messaging information*/
-CREATE TABLE MESSAGE (
+CREATE TABLE UMESSAGE (
   messageID INT NOT NULL;
   messageContent VARCHAR(225 BYTE),
   createDate DATE,
