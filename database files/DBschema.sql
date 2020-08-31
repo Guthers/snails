@@ -21,7 +21,7 @@ CREATE TABLE ENTRY (
   postID INT PRIMARY KEY,
   postContent VARCHAR(225 BYTE),
   createDate DATE,
-  getAuthorID INT,                        //Get the authorID of the post
+  getAuthorID INT,                        /*Get the authorID of the post*/
   getAuthor VARCHAR(225 BYTE),           
 );
 
@@ -31,10 +31,10 @@ CREATE TABLE MESSAGE (
   messageID INT PRIMARY KEY;
   messageContent VARCHAR(225 BYTE),
   createDate DATE,
-  FromUserID INT,                        //Get userID who sent the message
-  ToUserID INT,                          //Get userID who received the message
-  FromUserName VARCHAR(225 BYTE),        //Get userName who sent the message
-  ToUserName VARCHAR(225 BYTE)           //Get userName who received the message
+  FromUserID INT,                        /*Get userID who sent the message*/
+  ToUserID INT,                          /*Get userID who received the message*/
+  FromUserName VARCHAR(225 BYTE),        /*Get userName who sent the message*/
+  ToUserName VARCHAR(225 BYTE)           /*Get userName who received the message*/
 );
 
 /*Table to store a reply:
