@@ -3,8 +3,6 @@
 /*Specifications: 
 Get messages of a user via userID
 Get posts of a user via userID 
-getUserResponses VARCHAR(225 BYTE),     //Get all the users who wrote a response
-LikedBy VARCHAR(225 BYTE)              //Get all the users who liked the post
 */
 
 /*Table that stores user informtation*/
