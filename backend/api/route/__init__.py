@@ -8,3 +8,4 @@ import api.route.news
 import api.route.transport
 import api.route.message
 import api.route.map
+import api.route.test
