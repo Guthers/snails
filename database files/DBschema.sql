@@ -17,7 +17,7 @@ CREATE TABLE USER (
 /*Table that stores an entry/post information*/
 CREATE TABLE EPOST (
   postID INT NOT NULL,
-  authorID INT,
+  authorID INT NOT NULL,
   content VARCHAR(225 BYTE),
   createDate DATE,
   likeCount INT,
