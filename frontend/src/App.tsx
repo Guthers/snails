@@ -1,41 +1,74 @@
-import React from 'react';
-import Bar from './Bar';
-import Message from './Message';
-import News from './News';
+import React, { useState, useEffect } from 'react';
+import Dashboard from './Dashboard';
 import Timetable from './Timetable';
+import Bar from './Bar';
+import Nav from './Nav';
+import News from './News';
+import MapMaze from './MapMaze';
+import Messages from './Message';
+import { Panel } from './Panel';
 
+const App: React.FC = () => {
+  const [edit, setEdit] = useState(false);
+  const [view, setView] = useState(false);
+  const [alert, setAlert] = useState(false);
 
-function App() {
+  useEffect(() => {
+    if (view) {
+      setAlert(true);
+    }
+  }, [view])
+
+  const panels: Map<string, JSX.Element> = new Map([
+    ["a", 
+    <Panel padding={"p-5"} borderRadius="rounded">
+      <Timetable/>
+    </Panel>],
+    ["b", 
+    <Panel borderRadius="rounded">
+      <div className="absolute inset-x-0">
+        <Bar time="13:06" date="5/12/2020" temperature="31°C" weather="Cloudy"/>
+      </div>
+      <News image="https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2623&q=80" title="Into the Unknown"/>
+    </Panel>],
+    ["c", 
+    <Panel borderRadius="rounded">
+      <Messages/>
+    </Panel>],
+    ["d", 
+    <Panel borderRadius="rounded">
+      <MapMaze/>
+    </Panel>],
+    ["e", 
+    <Panel borderRadius="rounded">
+    </Panel>
+    ]
+  ]);
+
   return (
-    <div className="h-screen bg-black grid grid-cols-2 lg:grid-cols-4 grid-rows-3 lg:grid-rows-2 text-white gap-5 p-5">
-      <div className="relative flex col-span-2 lg:col-span-3">
-        <div className="absolute inset-x-0">
-          <Bar time="13:06" date="5/12/2020" temperature="31°C" weather="Cloudy"/>
-        </div>
-          <News image="https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2623&q=80" title="Into the Unknown"/>
-      </div>
+    <div>
+      {
+      view
+        ? null
+        : <Nav editFn={() => setEdit(!edit)} viewFn={() => setView(!view)}/>
+      }
+      <Dashboard isEdit={edit} panels={panels}/>
 
-      <div className="row-span-1 lg:row-span-2 bg-green-900">
-            <Timetable/>
-      </div>
-
-      <div className="bg-snail-gray-800 overflow-hidden">
-      </div>
-
-      <div className="bg-snail-gray-800 overflow-hidden">
-      </div>
-
-      <div className="bg-snail-gray-800 overflow-hidden">
-        <div className="m-5">
-          <div className="my-3">
-            <Message message="What is the most disorganised course and why is it DECO3801?"/>
-          </div>
-          <div className="my-3">
-            <Message message="Best coffee on campus?"/>
+      {
+      alert 
+      ?
+      <div className="bg-teal-100 border-t-4 border-teal-500 mt-32 text-teal-900 px-4 py-3 shadow-md absolute top-0" 
+            onClick={()=>setAlert(!alert)}
+            role="alert">
+        <div className="flex">
+          <div className="py-1"><svg className="fill-current h-6 w-6 text-teal-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
+          <div>
+            <p className="">Press ESC to exit full screen view.</p>
           </div>
         </div>
-      
       </div>
+      : null
+      }
     </div>
   );
 }
