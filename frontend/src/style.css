@@ -590,9 +590,6 @@ video {
   height: auto;
 }
 
-.wrapper {
-}
-
 .container {
   width: 100%;
 }
@@ -18270,20 +18267,139 @@ video {
           animation: bounce 1s infinite;
 }
 
-.text-shadow {
-  text-shadow: 0 2px 4px rgba(0,0,0,0.10);
+.react-resizable {
+  position: relative;
 }
 
-.text-shadow-md {
-  text-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
+.react-resizable-handle-sw {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+  transform: rotate(90deg);
 }
 
-.text-shadow-lg {
-  text-shadow: 0 15px 30px rgba(0,0,0,0.11), 0 5px 15px rgba(0,0,0,0.08);
+.react-resizable-handle-se {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
 }
 
-.text-shadow-none {
-  text-shadow: none;
+.react-resizable-handle-nw {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+  transform: rotate(180deg);
+}
+
+.react-resizable-handle-ne {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+  transform: rotate(270deg);
+}
+
+.react-resizable-handle-w,
+.react-resizable-handle-e {
+  top: 50%;
+  margin-top: -10px;
+  cursor: ew-resize;
+}
+
+.react-resizable-handle-w {
+  left: 0;
+  transform: rotate(135deg);
+}
+
+.react-resizable-handle-e {
+  right: 0;
+  transform: rotate(315deg);
+}
+
+.react-resizable-handle-n,
+.react-resizable-handle-s {
+  left: 50%;
+  margin-left: -10px;
+  cursor: ns-resize;
+}
+
+.react-resizable-handle-n {
+  top: 0;
+  transform: rotate(225deg);
+}
+
+.react-resizable-handle-s {
+  bottom: 0;
+  transform: rotate(45deg);
+}
+
+.react-grid-layout {
+  position: relative;
+  transition: height 200ms ease;
+}
+
+.react-grid-item {
+  transition: all 200ms ease;
+  transition-property: left, top;
+}
+
+.react-grid-item.cssTransforms {
+  transition-property: transform;
+}
+
+.react-grid-item.resizing {
+  z-index: 1;
+  will-change: width, height;
+}
+
+.react-grid-item.react-draggable-dragging {
+  transition: none;
+  z-index: 3;
+  will-change: transform;
+}
+
+.react-grid-item.dropping {
+  visibility: hidden;
+}
+
+.react-grid-item.react-grid-placeholder {
+  --bg-opacity: 1;
+  background-color: #2a4365;
+  background-color: rgba(42, 67, 101, var(--bg-opacity));
+  --bg-opacity: 0.25;
+  border-radius: 0.375rem;
+  transition-duration: 100ms;
+  z-index: 2;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.react-grid-item > .react-resizable-handle {
+  width: 0.75rem;
+  height: 0.75rem;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  cursor: se-resize;
+}
+
+.react-grid-item > .react-resizable-handle::after {
+  width: 0.75rem;
+  height: 0.75rem;
+  right: 0;
+  bottom: 0;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  position: absolute;
+  content: "";
+  border-right: 2px solid rgba(0, 0, 0, 0.4);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+}
+
+.react-resizable-hide > .react-resizable-handle {
+  display: none;
 }
 
 @media (min-width: 640px) {
@@ -35870,22 +35986,6 @@ video {
   .sm\:animate-bounce {
     -webkit-animation: bounce 1s infinite;
             animation: bounce 1s infinite;
-  }
-
-  .sm\:text-shadow {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.10);
-  }
-
-  .sm\:text-shadow-md {
-    text-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
-  }
-
-  .sm\:text-shadow-lg {
-    text-shadow: 0 15px 30px rgba(0,0,0,0.11), 0 5px 15px rgba(0,0,0,0.08);
-  }
-
-  .sm\:text-shadow-none {
-    text-shadow: none;
   }
 }
 
@@ -53474,22 +53574,6 @@ video {
     -webkit-animation: bounce 1s infinite;
             animation: bounce 1s infinite;
   }
-
-  .md\:text-shadow {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.10);
-  }
-
-  .md\:text-shadow-md {
-    text-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
-  }
-
-  .md\:text-shadow-lg {
-    text-shadow: 0 15px 30px rgba(0,0,0,0.11), 0 5px 15px rgba(0,0,0,0.08);
-  }
-
-  .md\:text-shadow-none {
-    text-shadow: none;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -71077,22 +71161,6 @@ video {
     -webkit-animation: bounce 1s infinite;
             animation: bounce 1s infinite;
   }
-
-  .lg\:text-shadow {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.10);
-  }
-
-  .lg\:text-shadow-md {
-    text-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
-  }
-
-  .lg\:text-shadow-lg {
-    text-shadow: 0 15px 30px rgba(0,0,0,0.11), 0 5px 15px rgba(0,0,0,0.08);
-  }
-
-  .lg\:text-shadow-none {
-    text-shadow: none;
-  }
 }
 
 @media (min-width: 1280px) {
@@ -88679,21 +88747,5 @@ video {
   .xl\:animate-bounce {
     -webkit-animation: bounce 1s infinite;
             animation: bounce 1s infinite;
-  }
-
-  .xl\:text-shadow {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.10);
-  }
-
-  .xl\:text-shadow-md {
-    text-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
-  }
-
-  .xl\:text-shadow-lg {
-    text-shadow: 0 15px 30px rgba(0,0,0,0.11), 0 5px 15px rgba(0,0,0,0.08);
-  }
-
-  .xl\:text-shadow-none {
-    text-shadow: none;
   }
 }
