@@ -62,6 +62,14 @@ CREATE TABLE LIKED (
 );
 
 
+/*Table to store the actual information boards (Used for the showing maps with respect to positions)*/
+CREATE TABLE BOARD (
+  boardID INT NOT NULL,
+  longitude FLOAT,
+  latitude FLOAT,
+  PRIMARY KEY (boardID) 
+);
+
 
 
 
