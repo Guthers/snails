@@ -2,6 +2,7 @@ from http import HTTPStatus
 from flasgger import swag_from
 import api.model as models
 from .api_register import api_register
+from flask import request
 
 
 @api_register.route('/maps', methods=["GET"])
@@ -15,11 +16,11 @@ from .api_register import api_register
     }
 })
 def maps():
-    result = models.MapModel()
+    result = models.MapModel(request.args["lat"], request.args["lng"])
     return models.MapModel.schema()().jsonify(result), 200
 
 
-@api_register.route('/maps/<int:mapsID>', methods=["GET"])
+@api_register.route('/maps/board', methods=["GET"])
 @swag_from({
     'tags': ['Maps'],
     'parameters': [{
@@ -35,6 +36,14 @@ def maps():
         }
     }
 })
-def maps_id(mapsID: int):
-    result = None  # TODO FIX
+def maps_id():
+    # assuming dict with tuple entries (lat, long)
+    boards = {}
+    boardID = request.args["id"]
+    boardID = int(boardID) if boardID.isdigit() else -1
+
+    if boardID not in boards:
+        return "Error: Bad Request", 400
+
+    result = models.MapModel(*boards[boardID])
     return models.MapModel.schema()().jsonify(result), 200
