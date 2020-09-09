@@ -1,4 +1,7 @@
+from typing import overload
 from .abstract_model import AbstractModel
+from flask_marshmallow import Schema
+import marshmallow as ma
 
 
 class MapModel(AbstractModel):
@@ -9,4 +12,9 @@ class MapModel(AbstractModel):
         :type content: str
         """
         self.url = \
-        "https://use.mazemap.com/embed.html#config=uq&v=1&zlevel=1&campuses=uq&campusid=406&center=" + str(lat) + "," + str(lng) + "&zoom=18&utm_medium=iframe"
+            "https://use.mazemap.com/embed.html#config=uq&v=1&zlevel=1&campuses=uq&campusid=406&center=" + \
+            str(lat) + "," + str(lng) + "&zoom=18&utm_medium=iframe"
+
+    @classmethod
+    def schema(cls) -> Schema:
+        return type(cls.__name__.replace("Model", "Schema"), (Schema,), {"url": ma.Schema.TYPE_MAPPING[str]()})
