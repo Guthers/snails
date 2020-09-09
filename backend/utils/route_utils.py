@@ -6,7 +6,7 @@ class PARAM_IN(Enum):
     QUERY = "query"
 
 
-def get_paramater_dictionary(param_in: PARAM_IN, name: str, type: type, required=True):
+def swag_param(param_in: PARAM_IN, name: str, type: type, required=True):
     return {
         'in': param_in.value,
         'name': name,
