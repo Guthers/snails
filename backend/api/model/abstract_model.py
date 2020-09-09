@@ -3,7 +3,6 @@ from flask_marshmallow import Schema
 import marshmallow as ma
 import typing
 
-
 class AbstractModel():
     """ Adds additional functionality to models
         - Namely auto-generation of schemas

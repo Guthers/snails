@@ -33,12 +33,15 @@ def maps():
         HTTPStatus.OK.value: {
             'description': 'Get an individual maps item',
             'schema': models.MapModel.schema()
+        },
+        HTTPStatus.BAD_REQUEST.value: {
+            'description': 'Returns "Error: Bad Request"'
         }
     }
 })
 def maps_id():
     # assuming dict with tuple entries (lat, long)
-    boards = {}
+    boards = {69: (153.013171, -27.497083), 420: (153.014641, -27.499610)}
     boardID = request.args["id"]
     boardID = int(boardID) if boardID.isdigit() else -1
 
