@@ -3,11 +3,15 @@ from flasgger import swag_from
 import api.model as models
 from .api_register import api_register
 from flask import request
+from utils.route_utils import get_paramater_dictionary, PARAM_IN
 
 
 @api_register.route('/maps', methods=["GET"])
 @swag_from({
     'tags': ['Maps'],
+    'parameters': [
+        get_paramater_dictionary(PARAM_IN.QUERY, "lat", float),
+        get_paramater_dictionary(PARAM_IN.QUERY, "lng", float)],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get a map link',
