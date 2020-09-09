@@ -9,6 +9,7 @@ flasgger = "*"
 flask-marshmallow = "*"
 apispec = "*"
 pylint = "*"
+xmltodict = "*"
 
 [dev-packages]
 
