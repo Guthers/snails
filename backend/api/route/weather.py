@@ -7,6 +7,12 @@ import datetime
 import urllib.request
 import xmltodict
 
+from functools import lru_cache
+
+# hardcoded since won't change
+BOM_URL = 'ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ11295.xml'
+
+
 @api_register.route('/weather', methods=["GET"])
 @swag_from({
     'tags': ['Weather'],
@@ -19,14 +25,19 @@ import xmltodict
 })
 def weather():
     result = get_bom()
+    return get_weather(time() // 60 // 60)
+
+@lru_cache(max_size=2)
+def get_weather(curtime):
+    """Get the weather JSON file.
+
+    curtime: current time in hours since the epoch
+    """
     return models.WeatherModel.schema()().jsonify(result), 200
 
 def get_bom() -> models.WeatherModel:
-    # hardcoded since won't change
-    url = 'ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ11295.xml'
-
     # making a request to bom everytime is probably not okay. Save file maybe?
-    with urllib.request.urlopen(url) as req:
+    with urllib.request.urlopen(BOM_URL) as req:
         # structure of bom xml sheet is hardcoded
         info = xmltodict.parse(req.read())["product"]["forecast"]["area"]
 
