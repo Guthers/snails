@@ -7,9 +7,11 @@ name = "pypi"
 flask = "*"
 flasgger = "*"
 flask-marshmallow = "*"
+flask-sqlalchemy = "*"
 apispec = "*"
 pylint = "*"
 xmltodict = "*"
+marshmallow-sqlalchemy = "*"
 
 [dev-packages]
 
