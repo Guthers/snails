@@ -8,9 +8,9 @@ Get posts of a user via userID
 /*Table that stores user informtation*/
 CREATE TABLE USER (
   studentID INT NOT NULL,
-  studentName VARCHAR(225 BYTE),
-  bio VARCHAR(225 BYTE),
-  userCreateDate VARCHAR(225 BYTE)
+  studentName VARCHAR(255 BYTE),
+  bio VARCHAR(255 BYTE),
+  userCreateDate DATE,
   PRIMARY KEY (studentID)
 );
 
@@ -18,7 +18,7 @@ CREATE TABLE USER (
 CREATE TABLE EPOST (
   postID INT NOT NULL,
   authorID INT NOT NULL,
-  content VARCHAR(225 BYTE),
+  content VARCHAR(255 BYTE),
   createDate DATE,
   likeCount INT,
   PRIMARY KEY (postID),
@@ -29,7 +29,7 @@ CREATE TABLE EPOST (
 /*Table to store private messaging information*/
 CREATE TABLE UMESSAGE (
   messageID INT NOT NULL;
-  messageContent VARCHAR(225 BYTE),
+  messageContent VARCHAR(255 BYTE),
   createDate DATE,
   fromUserID INT,                        /*Get userID who sent the message*/
   toUserID INT,                          /*Get userID who received the message*/
@@ -45,7 +45,7 @@ CREATE TABLE REPLY (
   postID INT,
   userID INT,
   createDate DATE,
-  RepliedToName VARCHAR(225 BYTE)
+  RepliedToName VARCHAR(255 BYTE)
   PRIMARY KEY (replyID),
   FOREIGN KEY (postID) REFERENCES POST(postID),
   FOREIGN KEY (userID) REFERENCES USER(studentID)
@@ -69,7 +69,4 @@ CREATE TABLE BOARD (
   latitude FLOAT,
   PRIMARY KEY (boardID) 
 );
-
-
-
 
