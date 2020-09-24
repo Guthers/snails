@@ -27,7 +27,7 @@ def weather():
     result = get_bom()
     return get_weather(time() // 60 // 60)
 
-@lru_cache(max_size=2)
+#@lru_cache(max_size=2)
 def get_weather(curtime):
     """Get the weather JSON file.
 

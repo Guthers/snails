@@ -4,7 +4,7 @@ from datetime import datetime
 
 class UserModel(AbstractModel):
     def __init__(self, created_at: datetime = None, username: str = None,
-                 name: str = None, user_id: int = None):
+                 name: str = None, user_id: str = None):
         """User - a model defined in Swagger
 
         :param created_at: The created_at of this User.  # noqa: E501
