@@ -49,19 +49,25 @@ def get_bom() -> models.WeatherModel:
     created_at = datetime.datetime.strptime(info["@start-time-local"],
             "%Y-%m-%dT%H:%M:%S+10:00")
 
-    current_temperature = int(next(filter(lambda i: i["@type"] ==
-            "air_temperature_maximum", info["element"]))["#text"])
+    current_temperature = None
+    precipitation = None
+    conditions = None
+    if isinstance(info["element"], list):
+        f = next(filter(lambda i: i["@type"] == "air_temperature_maximum",
+                info["element"]), None)
+        if f is not None:
+            current_temperature = int(f)
 
-    precipitation = next(filter(lambda i: i["@type"] ==
-            "precipitation_range", info["element"]), None)
-    if precipitation:
-        # VERY hardcoded but oh well. Should make flexible later
-        precipitation = precipitation["#text"].split(' ')
-        precipitation = (int(precipitation[0]) + int(precipitation[2]))/2
+        precipitation = next(filter(lambda i: i["@type"] ==
+                "precipitation_range", info["element"]), None)
+        if precipitation:
+            # VERY hardcoded but oh well. Should make flexible later
+            precipitation = precipitation["#text"].split(' ')
+            precipitation = (int(precipitation[0]) + int(precipitation[2]))/2
 
-    # converts condition into PascalCase
-    conditions = ''.join(x for x in next(filter(lambda i: i["@type"] ==
-        "precis", info["text"]))["#text"][:-1].title() if not x.isspace())
+        # converts condition into PascalCase
+        conditions = ''.join(x for x in next(filter(lambda i: i["@type"] ==
+            "precis", info["text"]))["#text"][:-1].title() if not x.isspace())
 
     return models.WeatherModel(created_at=created_at,
             current_temperature=current_temperature,
