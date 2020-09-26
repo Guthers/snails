@@ -42,13 +42,13 @@ def user():
     return models.UserModel.schema()().jsonify(result), 200
 
 
-@api_register.route('/user/<str:userID>', methods=["GET"])
+@api_register.route('/user/<string:userID>', methods=["GET"])
 @swag_from({
     'tags': ['User'],
     'parameters': [{
         'in': 'path',
         'name': 'userID',
-        'type': 'str',
+        'type': 'string',
         'required': 'true'
     }],
     'responses': {
