@@ -4,6 +4,7 @@ import api.model as models
 from .api_register import api_register
 
 import datetime
+from time import time
 import urllib.request
 import xmltodict
 
@@ -24,16 +25,15 @@ BOM_URL = 'ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ11295.xml'
     }
 })
 def weather():
-    result = get_bom()
     return get_weather(time() // 60 // 60)
 
-#@lru_cache(max_size=2)
+@lru_cache(maxsize=2)
 def get_weather(curtime):
     """Get the weather JSON file.
 
     curtime: current time in hours since the epoch
     """
-    return models.WeatherModel.schema()().jsonify(result), 200
+    return models.WeatherModel.schema()().jsonify(get_bom()), 200
 
 def get_bom() -> models.WeatherModel:
     # making a request to bom everytime is probably not okay. Save file maybe?
@@ -56,18 +56,19 @@ def get_bom() -> models.WeatherModel:
         f = next(filter(lambda i: i["@type"] == "air_temperature_maximum",
                 info["element"]), None)
         if f is not None:
-            current_temperature = int(f)
+            current_temperature = int(f["#text"])
 
-        precipitation = next(filter(lambda i: i["@type"] ==
+        f = next(filter(lambda i: i["@type"] ==
                 "precipitation_range", info["element"]), None)
-        if precipitation:
+        if f is not None:
             # VERY hardcoded but oh well. Should make flexible later
-            precipitation = precipitation["#text"].split(' ')
+            precipitation = f["#text"].split(' ')
             precipitation = (int(precipitation[0]) + int(precipitation[2]))/2
 
         # converts condition into PascalCase
-        conditions = ''.join(x for x in next(filter(lambda i: i["@type"] ==
-            "precis", info["text"]))["#text"][:-1].title() if not x.isspace())
+        f = next(filter(lambda i: i["@type"] == "precis", info["text"]), None)
+        if f is not None:
+            conditions = ''.join(x for x in f["#text"][:-1].title() if not x.isspace())
 
     return models.WeatherModel(created_at=created_at,
             current_temperature=current_temperature,
