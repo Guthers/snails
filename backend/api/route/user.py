@@ -8,6 +8,7 @@ import api.model as models
 import api.db as dbs
 from .api_register import api_register
 
+
 @api_register.route('/user', methods=["POST"])
 @swag_from({
     'tags': ['User'],
@@ -17,8 +18,7 @@ from .api_register import api_register
             'schema': models.UserModel.schema()
         },
         HTTPStatus.BAD_REQUEST.value: {
-            'description': 'Returns "Invalid username or name" or "Failed to
-            commit to database"'
+            'description': 'Returns "Invalid username or name" or "Failed tocommit to database"'
         }
     }
 })
@@ -29,8 +29,7 @@ def user():
     if dbs.UserDB.query.filter_by(studentID=studentID).scalar() is not None:
         return "Invalid username or name", 400
 
-    dbs.session.add(dbs.UserDB(studentID = studentID, studentname =
-        userInfo["name"], createDate = datetime.now()))
+    dbs.session.add(dbs.UserDB(studentID=studentID, studentname=userInfo["name"], createDate=datetime.now()))
     dbs.session.commti()
 
     # retrieve from userdb
@@ -39,9 +38,7 @@ def user():
     if user is None:
         return "Failed to commit to database", 400
 
-    result = models.UserModel(username = user.studentID, name =
-            user.studentName, user_id = user.studentID, created_at =
-            user.createDate)
+    result = models.UserModel(username=user.studentID, name=user.studentName, user_id=user.studentID, created_at=user.createDate)
     return models.UserModel.schema()().jsonify(result), 200
 
 
@@ -71,9 +68,7 @@ def user_id(userID: str):
     if user is None:
         return "userID not found", 400
 
-    result = models.UserModel(username = user.studentID, name =
-            user.studentName, user_id = user.studentID, created_at =
-            user.createDate)
+    result = models.UserModel(username=user.studentID, name=user.studentName, user_id=user.studentID, created_at=user.createDate)
     return result.schema()().jsonify(result), 200
 
 

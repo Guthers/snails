@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flasgger import Swagger
-from api.route import api_register
 from argparse import ArgumentParser
+
 
 def create_app():
     app = Flask(__name__)
@@ -13,8 +13,6 @@ def create_app():
     }
     swagger = Swagger(app)
 
-    app.register_blueprint(api_register, url_prefix='/api')
-
     #app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://username:password@localhost/db_name"
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///test.db"
 
@@ -24,10 +22,18 @@ def create_app():
     return app
 
 
+# Create the inital app
 app = create_app()
-db = SQLAlchemy(app)
 
+# Then register all the endpoints (which need the app base to be made)
+from api.route import api_register
+app.register_blueprint(api_register, url_prefix='/api')
+
+# This should only be done once, and shouldn't be in the root, but will work for now
+db = SQLAlchemy(app)
+db.drop_all()
 db.create_all()
+
 
 if __name__ == '__main__':
     parser = ArgumentParser()

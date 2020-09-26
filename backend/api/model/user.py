@@ -1,8 +1,14 @@
 from .abstract_model import AbstractModel
 from datetime import datetime
+from api.db.db import db
 
 
-class UserModel(AbstractModel):
+class UserModel(AbstractModel, db.Model):
+    username = db.Column(db.String(8), primary_key=True)
+    name = db.Column(db.String(8))
+    user_id = db.Column(db.String(8))
+    created_at = db.Column(db.DateTime)
+
     def __init__(self, created_at: datetime = None, username: str = None,
                  name: str = None, user_id: str = None):
         """User - a model defined in Swagger

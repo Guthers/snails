@@ -1,4 +1,4 @@
-from .board import BoardDB
+from .board import Board
 from .epost import Epost
 from .liked import Liked
 from .reply import Reply
