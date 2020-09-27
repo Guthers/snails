@@ -3,6 +3,7 @@ from flasgger import swag_from
 import api.model as models
 from .api_register import api_register
 
+import time
 import datetime
 from time import time
 import urllib.request
@@ -25,7 +26,7 @@ BOM_URL = 'ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ11295.xml'
     }
 })
 def weather():
-    return get_weather(time() // 60 // 60)
+    return get_weather(time.time() // 60 // 60)
 
 @lru_cache(maxsize=2)
 def get_weather(curtime):
