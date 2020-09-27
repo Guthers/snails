@@ -45,13 +45,13 @@ CREATE TABLE REPLY (
   postID INT,
   userID INT,
   createDate DATE,
-  RepliedToName VARCHAR(255 BYTE)
+  response VARCHAR(255 BYTE) //The string that's a response to a post
   PRIMARY KEY (replyID),
   FOREIGN KEY (postID) REFERENCES POST(postID),
   FOREIGN KEY (userID) REFERENCES USER(studentID)
 );
 
-/*Table to store a reply:
+/*Table to store likes:
 This allows us to get all people who liked a post*/
 CREATE TABLE LIKED (
   postID INT,
