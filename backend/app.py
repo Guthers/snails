@@ -3,6 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flasgger import Swagger
 from argparse import ArgumentParser
 
+DBM = "mysql+pymysql"
+HST = "localhost"
+DTB = "snails"
+USR = "root"
+PWD = "INSERT PASSWORD"
+PRT = "3306"
+CONNECTION_STRING = f"{DBM}://{USR}:{PWD}@{HST}:{PRT}/{DTB}"
 
 def create_app():
     app = Flask(__name__)
@@ -13,7 +20,7 @@ def create_app():
     }
     swagger = Swagger(app)
 
-    #app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://username:password@localhost/db_name"
+    #app.config['SQLALCHEMY_DATABASE_URI'] = CONNECTION_STRING
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///test.db"
 
     # this is to shut up a warning and is PROBABLY fine
@@ -30,7 +37,7 @@ from api.route import api_register
 app.register_blueprint(api_register, url_prefix='/api')
 
 # This should only be done once, and shouldn't be in the root, but will work for now
-db = SQLAlchemy(app)
+from api.db import db
 db.drop_all()
 db.create_all()
 

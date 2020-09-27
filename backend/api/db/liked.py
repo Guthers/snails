@@ -5,5 +5,5 @@ class Liked(db.Model):
             db.PrimaryKeyConstraint('postID', 'userID'),
             )
     postID = db.Column(db.Integer, db.ForeignKey('epost.postID'))
-    userID = db.Column(db.Integer, db.ForeignKey('userdb.studentID'))
+    userID = db.Column(db.String(255), db.ForeignKey('userdb.studentID'))
     createDate = db.Column(db.Date())

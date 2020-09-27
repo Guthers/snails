@@ -29,8 +29,8 @@ def user():
     if dbs.UserDB.query.filter_by(studentID=studentID).scalar() is not None:
         return "Invalid username or name", 400
 
-    dbs.session.add(dbs.UserDB(studentID=studentID, studentname=userInfo["name"], createDate=datetime.now()))
-    dbs.session.commti()
+    dbs.db.session.add(dbs.UserDB(studentID=studentID, studentname=userInfo["name"], createDate=datetime.now()))
+    dbs.db.session.commti()
 
     # retrieve from userdb
     user = dbs.UserDB.query.filter_by(studentID=studentID).first()

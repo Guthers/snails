@@ -12,6 +12,7 @@ apispec = "*"
 pylint = "*"
 xmltodict = "*"
 marshmallow-sqlalchemy = "*"
+pymysql = "*"
 
 [dev-packages]
 

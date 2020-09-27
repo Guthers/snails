@@ -1,3 +1,4 @@
+from .db import db
 from .board import Board
 from .epost import Epost
 from .liked import Liked
