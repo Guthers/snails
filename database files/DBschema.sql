@@ -21,6 +21,7 @@ CREATE TABLE EPOST (
   content VARCHAR(255 BYTE),
   createDate DATE,
   likeCount INT,
+  is_deleted BOOLEAN NOT NULL DEFAULT FALSE /*To account for deleted posts*/
   PRIMARY KEY (postID),
   FOREIGN KEY (authorID) REFERENCES USER(studentID)
 );
@@ -45,7 +46,8 @@ CREATE TABLE REPLY (
   postID INT,
   userID INT,
   createDate DATE,
-  response VARCHAR(255 BYTE) //The string that's a response to a post
+  response VARCHAR(255 BYTE) /*The string that's a response to a post*/
+  is_deleted BOOLEAN NOT NULL DEFAULT FALSE /*To apply to deleted replies to posts*/
   PRIMARY KEY (replyID),
   FOREIGN KEY (postID) REFERENCES POST(postID),
   FOREIGN KEY (userID) REFERENCES USER(studentID)
