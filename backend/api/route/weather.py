@@ -5,7 +5,6 @@ from .api_register import api_register
 
 import time
 import datetime
-from time import time
 import urllib.request
 import xmltodict
 
@@ -51,26 +50,35 @@ def get_bom() -> models.WeatherModel:
             "%Y-%m-%dT%H:%M:%S+10:00")
 
     current_temperature = None
+    prob_precipitation = None
     precipitation = None
     conditions = None
-    if isinstance(info["element"], list):
-        f = next(filter(lambda i: i["@type"] == "air_temperature_maximum",
-                info["element"]), None)
+    if isinstance(info, list) or isinstance(info, dict):
+        f = next(filter(lambda i: isinstance(i, dict) and i["@type"] ==
+            "air_temperature_maximum", info), None)
         if f is not None:
             current_temperature = int(f["#text"])
 
-        f = next(filter(lambda i: i["@type"] ==
-                "precipitation_range", info["element"]), None)
+        f = next(filter(lambda i: isinstance(i, dict) and i["@type"] ==
+                "probability_of_precipitation", info["text"]), None)
+        if f is not None:
+            # VERY hardcoded but oh well. Should make flexible later
+            prob_precipitation = int(f["#text"].strip("%"))
+
+        f = next(filter(lambda i: isinstance(i, dict) and i["@type"] ==
+                "precipitation_range", info), None)
         if f is not None:
             # VERY hardcoded but oh well. Should make flexible later
             precipitation = f["#text"].split(' ')
             precipitation = (int(precipitation[0]) + int(precipitation[2]))/2
 
         # converts condition into PascalCase
-        f = next(filter(lambda i: i["@type"] == "precis", info["text"]), None)
+        f = next(filter(lambda i: isinstance(i, dict) and i["@type"] ==
+            "precis", info["text"]), None)
         if f is not None:
             conditions = ''.join(x for x in f["#text"][:-1].title() if not x.isspace())
 
     return models.WeatherModel(created_at=created_at,
             current_temperature=current_temperature,
+            prob_precipitation=prob_precipitation,
             precipitation=precipitation, conditions=conditions)
