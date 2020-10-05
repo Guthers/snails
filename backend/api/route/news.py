@@ -29,7 +29,8 @@ UQNEWS_RSS_URL = 'http://www.uq.edu.au/news/rss/news_feed.xml'
 def news():
     res = refresh_news(time() // 60 // 60)
     return json.dumps(res, default=str), 200
-    #return '[' + ','.join(models.NewsModel.schema()().jsonify(i) for i in res) + ']', 200
+    # return models.NewsModel.schema()().jsonify(res), 200
+    return flask.json.jsonify(res), 200
 
 @api_register.route('/news/<string:newsID>', methods=["GET"])
 @swag_from({
