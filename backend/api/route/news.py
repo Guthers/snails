@@ -1,7 +1,7 @@
 """Get tha news"""
 
 import json
-
+import flask
 from http import HTTPStatus
 from flasgger import swag_from
 import api.model as models
@@ -28,7 +28,7 @@ UQNEWS_RSS_URL = 'http://www.uq.edu.au/news/rss/news_feed.xml'
 })
 def news():
     res = refresh_news(time() // 60 // 60)
-    return json.dumps(res, default=str), 200
+    #return json.dumps(res, default=str), 200
     # return models.NewsModel.schema()().jsonify(res), 200
     return flask.json.jsonify(res), 200
 
