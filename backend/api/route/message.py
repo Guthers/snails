@@ -45,7 +45,31 @@ def message_user_list(userID: int):
     }
 })
 def message_id_get(messageID: int):
-    result = None  # TODO FIX
+    message = dbs.Umessage.query.filter_by(message_id=messageID).first()
+
+    # the order in which this happens gives attackers info
+    if not message:
+        return "messageID was not found", 404
+
+    studentID = request.headers.get("x-uq-user", None)
+    if not studentID or (message.from_user_id != studentID and
+            message.to_user_id != studentID):
+        return "Invalid Authorization"
+
+    userTo = dbs.UserDB.query.filter_by(student_id=message.to_user_id).first()
+    resultTo = models.UserModel(username=userTo.student_id,
+            name=userTo.student_name, user_id=userTo.student_id,
+            created_at=userTo.create_date)
+
+    userFrom = dbs.UserDB.query.filter_by(student_id=message.from_user_id).first()
+    resultFrom = models.UserModel(username=userFrom.student_id,
+            name=userFrom.student_name, user_id=userFrom.student_id,
+            created_at=userFrom.create_date)
+
+    result = models.MessageModel(created_at=message.create_date, to=userTo,
+            _from=userFrom, content=message.message_content,
+            message_id=message.message_id)
+
     return models.MessageModel.schema()().jsonify(result), 200
 
 
@@ -68,15 +92,17 @@ def message_id_get(messageID: int):
     }
 })
 def message_id_send(userID: str):
-    row = dbs.Umessage(message_content=request.args["content"],
-            from_user_id=request.headers["x-uq-user"], to_user_id=userID,
+    studentID = request.headers.get("x-uq-user", None)
+    if not studentID:
+        return "Missing username", 400
+    row = dbs.Umessage(message_content=request.args.get("content",None),
+            from_user_id=studentID, to_user_id=userID,
             create_date=datetime.now())
 
     dbs.db.session.add(row)
     dbs.db.session.commit()
     # retrieve from messagedb
     message = dbs.Umessage.query.filter_by(message_id=row.message_id).first()
-    print(message.to_user_id)
 
     userTo = dbs.UserDB.query.filter_by(student_id=message.to_user_id).first()
     resultTo = models.UserModel(username=userTo.student_id,
