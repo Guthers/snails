@@ -26,19 +26,21 @@ def user():
     studentID = request.headers["x-uq-user"]
     userInfo = json.loads(request.headers["x-kvd-payload"])
     # check if student is in userdb
-    if dbs.UserDB.query.filter_by(studentID=studentID).scalar() is not None:
+    if dbs.UserDB.query.filter_by(student_id=studentID).scalar() is not None:
         return "Invalid username or name", 400
 
-    dbs.db.session.add(dbs.UserDB(studentID=studentID, studentname=userInfo["name"], createDate=datetime.now()))
-    dbs.db.session.commti()
+    dbs.db.session.add(dbs.UserDB(student_id=studentID,
+        student_name=userInfo["name"], create_date=datetime.now()))
+    dbs.db.session.commit()
 
     # retrieve from userdb
-    user = dbs.UserDB.query.filter_by(studentID=studentID).first()
+    user = dbs.UserDB.query.filter_by(student_id=studentID).first()
 
     if user is None:
         return "Failed to commit to database", 400
 
-    result = models.UserModel(username=user.studentID, name=user.studentName, user_id=user.studentID, created_at=user.createDate)
+    result = models.UserModel(username=user.student_id, name=user.student_name,
+            user_id=user.student_id, created_at=user.create_date)
     return models.UserModel.schema()().jsonify(result), 200
 
 
@@ -63,12 +65,13 @@ def user():
 })
 def user_id(userID: str):
     # retrieve from userdb
-    user = dbs.UserDB.query.filter_by(studentID=userID).first()
+    user = dbs.UserDB.query.filter_by(student_id=userID).first()
 
     if user is None:
         return "userID not found", 400
 
-    result = models.UserModel(username=user.studentID, name=user.studentName, user_id=user.studentID, created_at=user.createDate)
+    result = models.UserModel(username=user.student_id, name=user.student_name,
+            user_id=user.student_id, created_at=user.create_date)
     return result.schema()().jsonify(result), 200
 
 

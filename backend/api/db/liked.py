@@ -2,8 +2,8 @@ from .db import db
 
 class Liked(db.Model):
     __table_args__ = (
-            db.PrimaryKeyConstraint('postID', 'userID'),
+            db.PrimaryKeyConstraint('post_id', 'user_id'),
             )
-    postID = db.Column(db.Integer, db.ForeignKey('epost.postID'))
-    userID = db.Column(db.String(255), db.ForeignKey('userdb.studentID'))
-    createDate = db.Column(db.Date())
+    post_id = db.Column(db.Integer, db.ForeignKey('epost.post_id'))
+    user_id = db.Column(db.String(255), db.ForeignKey('userdb.student_id'))
+    create_date = db.Column(db.Date())

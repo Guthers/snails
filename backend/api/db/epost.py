@@ -2,9 +2,9 @@ from .db import db
 
 class Epost(db.Model):
     __tablename__ = "epost"
-    postID = db.Column(db.Integer, primary_key = True)
-    authorID = db.Column(db.String(255), db.ForeignKey('userdb.studentID'), nullable=False)
+    post_id = db.Column(db.Integer, primary_key = True)
+    author_id = db.Column(db.String(255), db.ForeignKey('userdb.student_id'), nullable=False)
     content = db.Column(db.String(255))
-    createDate = db.Column(db.Date())
-    likeCount = db.Column(db.Integer)
+    create_date = db.Column(db.Date())
+    like_count = db.Column(db.Integer)
     likes = db.relationship("Liked", backref="epost", lazy=True)
