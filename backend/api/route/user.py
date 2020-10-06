@@ -23,7 +23,9 @@ from .api_register import api_register
     }
 })
 def user():
-    studentID = request.headers["x-uq-user"]
+    studentID = request.headers.get("x-uq-user", None)
+    if not studentID:
+        return "Missing username", 400
     userInfo = json.loads(request.headers["x-kvd-payload"])
     # check if student is in userdb
     if dbs.UserDB.query.filter_by(student_id=studentID).scalar() is not None:
