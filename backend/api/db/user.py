@@ -9,6 +9,6 @@ class UserDB(db.Model):
     eposts = db.relationship('Epost', backref='author', lazy=True)
     messages_sent = db.relationship('Umessage',
             foreign_keys='Umessage.from_user_id', backref='from_user', lazy=True)
-    messagesRecv = db.relationship('Umessage',
+    messages_recv = db.relationship('Umessage',
             foreign_keys='Umessage.to_user_id', backref='to_user', lazy=True)
     likes = db.relationship("Liked", backref="user", lazy=True)
