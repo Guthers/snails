@@ -51,7 +51,7 @@ def entry_id(entryID: int):
     }],
     'responses': {
         HTTPStatus.OK.value: {
-            'description': 'Gets the entry specified by the id\'s replies',
+            'description': 'Gets a list of entries which are replies to the entryID',
             'schema': models.EntryModel.schema()
         }
     }
