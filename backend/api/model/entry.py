@@ -7,8 +7,8 @@ from .user import UserModel
 class EntryModel(AbstractModel):
     def __init__(self, created_at: datetime = None, reply_to: str = None,
                  content: str = None, liked_by: List[UserModel] = None,
-                 replies: List[str] = None, author: UserModel = None,
-                 entry_id: str = None):
+                 replies: List[int] = None, author: UserModel = None,
+                 entry_id: int = None):
         """Entry - a model defined in Swagger
 
         :param created_at: The created_at of this Entry.  # noqa: E501
@@ -20,11 +20,11 @@ class EntryModel(AbstractModel):
         :param liked_by: The liked_by of this Entry.  # noqa: E501
         :type liked_by: List[User]
         :param replies: The replies of this Entry.  # noqa: E501
-        :type replies: List[str]
+        :type replies: List[int]
         :param author: The author of this Entry.  # noqa: E501
         :type author: User
         :param id: The id of this Entry.  # noqa: E501
-        :type id: str
+        :type id: int
         """
         self.created_at = created_at
         self.reply_to = reply_to
