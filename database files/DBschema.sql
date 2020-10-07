@@ -19,8 +19,8 @@ CREATE TABLE EPOST (
   postID INT NOT NULL,
   authorID INT NOT NULL,
   content VARCHAR(255 BYTE),
-  createDate DATE,
-  likeCount INT,
+  createDate TIMESTAMP NOT NULL DEFAULT DATETIME,
+--   likeCount INT,
   is_deleted BOOLEAN NOT NULL DEFAULT FALSE /*To account for deleted posts*/
   PRIMARY KEY (postID),
   FOREIGN KEY (authorID) REFERENCES USER(studentID)
@@ -42,16 +42,23 @@ CREATE TABLE UMESSAGE (
 /*Table to store a reply:
 This allows us to get all responses to a post*/
 CREATE TABLE REPLY (
-  replyID INT NOT NULL,
-  postID INT,
-  userID INT,
-  createDate DATE,
-  response VARCHAR(255 BYTE) /*The string that's a response to a post*/
-  is_deleted BOOLEAN NOT NULL DEFAULT FALSE /*To apply to deleted replies to posts*/
-  PRIMARY KEY (replyID),
-  FOREIGN KEY (postID) REFERENCES POST(postID),
-  FOREIGN KEY (userID) REFERENCES USER(studentID)
+  parentID INT NOT NULL,
+  childID INT NOT NULL,
+
+  FOREIGN KEY (childID) REFERENCES POST(postID),
+  FOREIGN kEY (parentID) REFERENCES POST(postID),
 );
+-- CREATE TABLE REPLY (
+--   replyID INT NOT NULL,
+--   postID INT,
+--   userID INT,
+--   createDate DATE,
+--   response VARCHAR(255 BYTE) /*The string that's a response to a post*/
+--   is_deleted BOOLEAN NOT NULL DEFAULT FALSE /*To apply to deleted replies to posts*/
+--   PRIMARY KEY (replyID),
+--   FOREIGN KEY (postID) REFERENCES POST(postID),
+--   FOREIGN KEY (userID) REFERENCES USER(studentID)
+-- );
 
 /*Table to store likes:
 This allows us to get all people who liked a post*/
