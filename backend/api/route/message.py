@@ -16,7 +16,7 @@ from utils.route_utils import swag_param, PARAM_IN
     'tags': ['Message'],
     'parameters': [{
         'in': 'path',
-        'name': 'messageID',
+        'name': 'userID',
         'type': 'int',
         'required': 'true'
     }],
@@ -39,7 +39,6 @@ def message_user_list(userID: str):
     studentID = request.headers.get("x-uq-user", None)
     if studentID != userID:
         # search in user.messages_sent for messages to studentID
-        print(user.messages_recv[0].from_user)
         for message in it.chain((m for m in user.messages_sent if m.to_user_id ==
             studentID), (m for m in user.messages_recv if m.from_user_id ==
                 studentID)):
@@ -81,6 +80,12 @@ def message_user_list(userID: str):
     'parameters': [{ 'in': 'path', 'name': 'messageID',
         'type': 'int',
         'required': 'true'
+    },
+    {
+        'in': 'header',
+        'name': 'Authorization',
+        'type': 'string',
+        'required': 'false'
     }],
     'responses': {
         HTTPStatus.OK.value: {
@@ -149,6 +154,10 @@ def message_id_send(userID: str):
     studentID = request.headers.get("x-uq-user", None)
     if not studentID:
         return "Missing username", 400
+
+    if dbs.UserDB.query.filter_by(student_id=studentID).scalar() is None:
+        return "Missing username", 400
+
     row = dbs.Umessage(message_content=request.args.get("content",None),
             from_user_id=studentID, to_user_id=userID,
             create_date=datetime.now())
