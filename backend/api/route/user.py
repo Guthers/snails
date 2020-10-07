@@ -77,23 +77,25 @@ def user_id(userID: str):
     return result.schema()().jsonify(result), 200
 
 
-@api_register.route('/user/<int:userID>/messages', methods=["GET"])
-@swag_from({
-    'tags': ['User'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'userID',
-        'type': 'int',
-        'required': 'true'
-    }],
-    'responses': {
-        HTTPStatus.OK.value: {
-            'description': 'Get a users messages',
-            'schema': models.MessageModel.schema()
-        }
-    }
-})
-@safe_fail
-def user_message(userID: int):
-    result = models.MessageModel()
-    return models.MessageModel.schema()().dump(result), 200
+# Was this part of the spec?
+# Will implement if needed but for now silenced
+#@api_register.route('/user/<int:userID>/messages', methods=["GET"])
+#@swag_from({
+#    'tags': ['User'],
+#    'parameters': [{
+#        'in': 'path',
+#        'name': 'userID',
+#        'type': 'int',
+#        'required': 'true'
+#    }],
+#    'responses': {
+#        HTTPStatus.OK.value: {
+#            'description': 'Get a users messages',
+#            'schema': models.MessageModel.schema()
+#        }
+#    }
+#})
+#@safe_fail
+#def user_message(userID: int):
+#    result = models.MessageModel()
+#    return models.MessageModel.schema()().dump(result), 200
