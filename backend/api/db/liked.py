@@ -1,4 +1,5 @@
 from .db import db
+import datetime
 
 class Liked(db.Model):
     __table_args__ = (
@@ -6,4 +7,4 @@ class Liked(db.Model):
             )
     post_id = db.Column(db.Integer, db.ForeignKey('epost.post_id'))
     user_id = db.Column(db.String(255), db.ForeignKey('userdb.student_id'))
-    create_date = db.Column(db.Date())
+    create_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)

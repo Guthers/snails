@@ -1,4 +1,5 @@
 from .db import db
+import datetime
 
 class Epost(db.Model):
     __tablename__ = "epost"
@@ -6,8 +7,8 @@ class Epost(db.Model):
     reply_id = db.Column(db.Integer, db.ForeignKey('epost.post_id'))
     author_id = db.Column(db.String(255), db.ForeignKey('userdb.student_id'), nullable=False)
     content = db.Column(db.String(255))
-    create_date = db.Column(db.Date())
+    create_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     like_count = db.Column(db.Integer)
     likes = db.relationship("Liked", backref="epost", lazy=True)
-    replies = db.relationship("Epost",
+    replies = db.relationship("Epost", cascade="all,delete",
             backref=db.backref("parent", remote_side=[post_id]), lazy=True)
