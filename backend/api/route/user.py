@@ -1,3 +1,4 @@
+from api.db.user import UserDB
 import json
 from datetime import datetime
 from http import HTTPStatus
@@ -32,7 +33,7 @@ def user():
         return "Invalid username or name", 400
 
     dbs.db.session.add(dbs.UserDB(student_id=studentID,
-        student_name=userInfo["name"], create_date=datetime.now()))
+                                  student_name=userInfo["name"], create_date=datetime.now()))
     dbs.db.session.commit()
 
     # retrieve from userdb
@@ -42,7 +43,7 @@ def user():
         return "Failed to commit to database", 400
 
     result = models.UserModel(username=user.student_id, name=user.student_name,
-            user_id=user.student_id, created_at=user.create_date)
+                              user_id=user.student_id, created_at=user.create_date)
     return models.UserModel.schema()().jsonify(result), 200
 
 
@@ -73,14 +74,31 @@ def user_id(userID: str):
         return "userID not found", 400
 
     result = models.UserModel(username=user.student_id, name=user.student_name,
-            user_id=user.student_id, created_at=user.create_date)
+                              user_id=user.student_id, created_at=user.create_date)
     return result.schema()().jsonify(result), 200
+
+
+@api_register.route('/user/make_some', methods=["GET"])
+def add_some():
+    from random import choice
+    import string
+    uid = ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(8))
+    fname = ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(5))
+    sname = ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(10))
+
+    new_user = dbs.UserDB(student_id=uid,
+                          student_name=f"{fname} {sname}", create_date=datetime.now())
+
+    dbs.db.session.insert(new_user)
+    dbs.db.session.commit()
+
+    return new_user.schema()().jsonify(new_user), 200
 
 
 # Was this part of the spec?
 # Will implement if needed but for now silenced
-#@api_register.route('/user/<int:userID>/messages', methods=["GET"])
-#@swag_from({
+# @api_register.route('/user/<int:userID>/messages', methods=["GET"])
+# @swag_from({
 #    'tags': ['User'],
 #    'parameters': [{
 #        'in': 'path',
@@ -94,8 +112,8 @@ def user_id(userID: str):
 #            'schema': models.MessageModel.schema()
 #        }
 #    }
-#})
-#@safe_fail
-#def user_message(userID: int):
+# })
+# @safe_fail
+# def user_message(userID: int):
 #    result = models.MessageModel()
 #    return models.MessageModel.schema()().dump(result), 200
