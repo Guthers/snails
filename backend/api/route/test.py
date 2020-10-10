@@ -4,7 +4,7 @@ from flasgger import swag_from
 import api.model as models
 from .api_register import api_register
 from flask import request
-
+from api.db import db
 
 @api_register.route('/user_info', methods=["GET"])
 @swag_from({
@@ -17,6 +17,9 @@ from flask import request
     }
 })
 def user_info():
+    print("\n\nFUCKING DONE SHIT\n\n")
+    db.drop_all()
+    db.create_all()
     userjson = request.headers['x-kvd-payload']
     user = json.loads(userjson)
     return user
