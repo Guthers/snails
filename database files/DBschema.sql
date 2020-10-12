@@ -15,7 +15,7 @@ CREATE TABLE USER (
 );
 
 /*Table that stores an entry/post information*/
-CREATE TABLE EPOST (
+CREATE TABLE POST (
   postID INT NOT NULL,
   authorID INT NOT NULL,
   content VARCHAR(255 BYTE),
@@ -28,7 +28,7 @@ CREATE TABLE EPOST (
 
 
 /*Table to store private messaging information*/
-CREATE TABLE UMESSAGE (
+CREATE TABLE MESSAGE (
   messageID INT NOT NULL;
   messageContent VARCHAR(255 BYTE),
   createDate DATE,
