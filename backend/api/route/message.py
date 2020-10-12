@@ -11,7 +11,6 @@ import flask
 
 from api.model import MessageModel, UserModel
 from api.db import db, Message, User 
-from utils.api_utils import safe_fail
 from utils.route_utils import swag_param, PARAM_IN
 
 @api_register.route('/messages/<string:user_id>', methods=["GET"])
