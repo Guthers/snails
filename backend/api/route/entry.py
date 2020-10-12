@@ -71,6 +71,66 @@ def create_entry():
     return EntryModel.schema()().jsonify(response), HTTPStatus.CREATED
 
 
+@api_register.route('/entries', methods=["GET"])
+@swag_from({
+    'tags': ['Entry'],
+    'parameters': [
+        {
+        'in': 'path',
+        'name': 'count',
+        'type': 'int',
+        'required': 'false'
+        },
+        {
+        'in': 'path',
+        'name': 'before[id]',
+        'type': 'entry_id',
+        'required': 'false'
+        },
+        {
+        'in': 'path',
+        'name': 'after[id]',
+        'type': 'entry_id',
+        'required': 'false'
+        },
+    ],
+    'responses': {
+        HTTPStatus.OK.value: {
+            'description': 'Returns a list of entries in reverse-chronological order',
+            'schema': EntryModel.schema()
+        }
+    }
+})
+def get_entries():
+    count = request.args.get("count", "20")
+    before_id = request.args.get("before[id]", None)
+    after_id = request.args.get("after[id]", None)
+
+    if not count.isdigit():
+        return "Invalid count", HTTPStatus.BAD_REQUEST
+
+    count = int(count)
+    
+    if before_id is not None and not before_id.isdigit():
+        return "Invalid before[id]", HTTPStatus.BAD_REQUEST
+
+    if after_id is not None and not after_id.isdigit():
+        return "Invalid after[id]", HTTPStatus.BAD_REQUEST
+
+    before = Entry.query.get(before_id)
+    after = Entry.query.get(after_id)
+    subquery = Entry.query.order_by(Entry.created_at.desc())
+    if before: 
+        subquery = subquery.filter(Entry.created_at < before.created_at)
+    if after:
+        subquery = subquery.filter(Entry.created_at > after.created_at)
+    
+    subquery = subquery.limit(count).all()
+
+    response = [create_entry_model(e) for e in subquery]
+        
+    return EntryModel.schema()().jsonify(response, many=True), HTTPStatus.OK
+
 
 @api_register.route('/entry/<int:entry_id>', methods=["GET","DELETE"])
 @swag_from({
