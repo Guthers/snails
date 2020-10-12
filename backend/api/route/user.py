@@ -1,14 +1,15 @@
-from api.db.user import UserDB
-import json
+from .api_register import api_register
+
 from datetime import datetime
 from http import HTTPStatus
 from flask import request
-from utils.api_utils import safe_fail
 from flasgger import swag_from
-import api.model as models
-import api.db as dbs
-from .api_register import api_register
 
+import json
+
+from api.db import db, User
+from api.model import UserModel
+from utils.api_utils import safe_fail
 
 @api_register.route('/user', methods=["POST"])
 @swag_from({
@@ -16,104 +17,72 @@ from .api_register import api_register
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Creates a user',
-            'schema': models.UserModel.schema()
+            'schema': UserModel.schema()
         },
         HTTPStatus.BAD_REQUEST.value: {
             'description': 'Returns "Invalid username or name" or "Failed tocommit to database"'
         }
     }
 })
-def user():
-    studentID = request.headers.get("x-uq-user", None)
-    if not studentID:
-        return "Missing username", 400
+def create_user():
+    student_id = request.headers.get("x-uq-user", None)
     userInfo = json.loads(request.headers["x-kvd-payload"])
-    # check if student is in userdb
-    if dbs.UserDB.query.filter_by(student_id=studentID).scalar() is not None:
-        return "Invalid username or name", 400
 
-    dbs.db.session.add(dbs.UserDB(student_id=studentID,
-                                  student_name=userInfo["name"], create_date=datetime.now()))
-    dbs.db.session.commit()
+    if not student_id:
+        return "Missing username", HTTPStatus.BAD_REQUEST
+
+    # check if student is in userdb
+    if User.query.get(student_id):
+        return "User already exists", HTTPStatus.BAD_REQUEST
+
+    db.session.add(User(id=student_id,
+                        name=userInfo["name"], 
+                        created_at=datetime.now()))
+    db.session.commit()
 
     # retrieve from userdb
-    user = dbs.UserDB.query.filter_by(student_id=studentID).first()
-
+    user = User.query.get(student_id)
     if user is None:
-        return "Failed to commit to database", 400
+        return "Failed to commit to database", HTTPStatus.NOT_FOUND
 
-    result = models.UserModel(username=user.student_id, name=user.student_name,
-                              user_id=user.student_id, created_at=user.create_date)
-    return models.UserModel.schema()().jsonify(result), 200
+    result = create_user_model(user)
+
+    return result.schema()().jsonify(result), HTTPStatus.OK
 
 
-@api_register.route('/user/<string:userID>', methods=["GET"])
+@api_register.route('/user/<string:user_id>', methods=["GET"])
 @swag_from({
     'tags': ['User'],
     'parameters': [{
         'in': 'path',
-        'name': 'userID',
+        'name': 'user_id',
         'type': 'string',
         'required': 'true'
     }],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get user info',
-            'schema': models.UserModel.schema()
+            'schema': UserModel.schema()
         },
         HTTPStatus.BAD_REQUEST.value: {
-            'description': 'Returns "userID not found"'
+            'description': 'Returns "user_id not found"'
         }
     }
 })
-def user_id(userID: str):
-    # retrieve from userdb
-    user = dbs.UserDB.query.filter_by(student_id=userID).first()
+def get_user(user_id: str):
+    user = User.query.get(user_id)
 
     if user is None:
-        return "userID not found", 400
+        return "User not found", HTTPStatus.NOT_FOUND
 
-    result = models.UserModel(username=user.student_id, name=user.student_name,
-                              user_id=user.student_id, created_at=user.create_date)
-    return result.schema()().jsonify(result), 200
+    result = create_user_model(user)
 
-
-@api_register.route('/user/make_some', methods=["GET"])
-def add_some():
-    from random import choice
-    import string
-    uid = ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(8))
-    fname = ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(5))
-    sname = ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(10))
-
-    new_user = dbs.UserDB(student_id=uid,
-                          student_name=f"{fname} {sname}", create_date=datetime.now())
-
-    dbs.db.session.insert(new_user)
-    dbs.db.session.commit()
-
-    return new_user.schema()().jsonify(new_user), 200
+    return result.schema()().jsonify(result), HTTPStatus.OK
 
 
-# Was this part of the spec?
-# Will implement if needed but for now silenced
-# @api_register.route('/user/<int:userID>/messages', methods=["GET"])
-# @swag_from({
-#    'tags': ['User'],
-#    'parameters': [{
-#        'in': 'path',
-#        'name': 'userID',
-#        'type': 'int',
-#        'required': 'true'
-#    }],
-#    'responses': {
-#        HTTPStatus.OK.value: {
-#            'description': 'Get a users messages',
-#            'schema': models.MessageModel.schema()
-#        }
-#    }
-# })
-# @safe_fail
-# def user_message(userID: int):
-#    result = models.MessageModel()
-#    return models.MessageModel.schema()().dump(result), 200
+def create_user_model(user: User) -> UserModel:
+    result = UserModel(created_at=user.created_at,
+                       username=user.id,
+                       name=user.name,
+                       user_id=user.id)
+    return result

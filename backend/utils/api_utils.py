@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import functools
 from api.model.exception import ExceptionModel
 
@@ -8,5 +9,5 @@ def safe_fail(f):
         try:
             return f(*args, **kwargs)
         except Exception as e:
-            return ExceptionModel.schema()().jsonify(ExceptionModel(f"Unexpected exception enocuntered: {e}")), 500
+            return ExceptionModel.schema()().jsonify(ExceptionModel(f"Unexpected exception enocuntered: {e}")), HTTPStatus.INTERNAL_SERVER_ERROR
     return decorated_function

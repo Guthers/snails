@@ -1,14 +1,15 @@
+from .api_register import api_register
+
 from http import HTTPStatus
 from flasgger import swag_from
-import api.model as models
-from .api_register import api_register
+from functools import lru_cache
 
 import time
 import datetime
 import urllib.request
 import xmltodict
 
-from functools import lru_cache
+from api.model import WeatherModel
 
 # hardcoded since won't change
 BOM_URL = 'ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ11295.xml'
@@ -20,7 +21,7 @@ BOM_URL = 'ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ11295.xml'
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Gets the current weather information',
-            'schema': models.WeatherModel.schema()
+            'schema': WeatherModel.schema()
         }
     }
 })
@@ -33,9 +34,9 @@ def get_weather(curtime):
 
     curtime: current time in hours since the epoch
     """
-    return models.WeatherModel.schema()().jsonify(get_bom()), 200
+    return WeatherModel.schema()().jsonify(get_bom()), HTTPStatus.OK
 
-def get_bom() -> models.WeatherModel:
+def get_bom() -> WeatherModel:
     # making a request to bom everytime is probably not okay. Save file maybe?
     with urllib.request.urlopen(BOM_URL) as req:
         # structure of bom xml sheet is hardcoded
@@ -78,7 +79,8 @@ def get_bom() -> models.WeatherModel:
         if f is not None:
             conditions = ''.join(x for x in f["#text"][:-1].title() if not x.isspace())
 
-    return models.WeatherModel(created_at=created_at,
-            current_temperature=current_temperature,
-            prob_precipitation=prob_precipitation,
-            precipitation=precipitation, conditions=conditions)
+    return WeatherModel(created_at=created_at,
+                        current_temperature=current_temperature,
+                        prob_precipitation=prob_precipitation,
+                        precipitation=precipitation, 
+                        conditions=conditions)
