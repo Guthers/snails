@@ -1,8 +1,10 @@
+from .api_register import api_register
+
 from http import HTTPStatus
 from flasgger import swag_from
-import api.model as models
-from .api_register import api_register
 from flask import request
+
+from api.model import MapModel
 from utils.route_utils import swag_param, PARAM_IN
 
 
@@ -15,13 +17,13 @@ from utils.route_utils import swag_param, PARAM_IN
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get a map link',
-            'schema': models.MapModel.schema()
+            'schema': MapModel.schema()
         }
     }
 })
 def maps():
-    result = models.MapModel(request.args["lat"], request.args["lng"])
-    return models.MapModel.schema()().jsonify(result), 200
+    result = MapModel(request.args["lat"], request.args["lng"])
+    return MapModel.schema()().jsonify(result), HTTPStatus.OK
 
 
 @api_register.route('/maps/board', methods=["GET"])
@@ -29,14 +31,14 @@ def maps():
     'tags': ['Maps'],
     'parameters': [{
         'in': 'path',
-        'name': 'mapsID',
+        'name': 'board_id',
         'type': 'int',
         'required': 'true'
     }],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get an individual maps item',
-            'schema': models.MapModel.schema()
+            'schema': MapModel.schema()
         },
         HTTPStatus.BAD_REQUEST.value: {
             'description': 'Returns "Error: Bad Request"'
@@ -46,11 +48,11 @@ def maps():
 def maps_id():
     # assuming dict with tuple entries (lat, long)
     boards = {69: (153.013171, -27.497083), 420: (153.014641, -27.499610)}
-    boardID = request.args["id"]
-    boardID = int(boardID) if boardID.isdigit() else -1
+    board_id = request.args["board_id"]
+    board_id = int(board_id) if board_id.isdigit() else -1
 
-    if boardID not in boards:
-        return "Error: Bad Request", 400
+    if board_id not in boards:
+        return "Error: Bad Request", HTTPStatus.BAD_REQUEST
 
-    result = models.MapModel(*boards[boardID])
-    return models.MapModel.schema()().jsonify(result), 200
+    result = MapModel(*boards[board_id])
+    return MapModel.schema()().jsonify(result), HTTPStatus.OK

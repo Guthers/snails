@@ -1,12 +1,15 @@
+from .api_register import api_register
+
 from http import HTTPStatus
 from datetime import datetime
 from flasgger import swag_from
-import api.model as models
-import api.db as dbs
-from .api_register import api_register
+from flask import request
+from typing import Tuple, List
 
 import flask
-from flask import request
+
+from api.db import db, Entry, Liked, User
+from api.model import EntryModel, UserModel
 from utils.route_utils import swag_param, PARAM_IN
 
 @api_register.route('/entry', methods=["POST"])
@@ -14,293 +17,238 @@ from utils.route_utils import swag_param, PARAM_IN
     'tags': ['Entry'],
     'parameters': [{
         'in': 'header',
-        'name': 'Authorization',
+        'name': 'x-uq-user',
         'type': 'string',
-        'required': 'false'
+        'required': 'true'
     },
     swag_param(PARAM_IN.QUERY, "content", str),
-    swag_param(PARAM_IN.QUERY, "replyTo", int),
+    swag_param(PARAM_IN.QUERY, "reply_to", int),
     ],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Creates an entry',
-            'schema': models.EntryModel.schema()
+            'schema': EntryModel.schema()
         },
         400: {
-            'description': 'Invalid replyTo or content or Authorization',
+            'description': 'Invalid reply_to or content or x-uq-user',
         }
     }
 })
-def entry():
-    studentID = request.headers.get("x-uq-user", None)
-    if not studentID:
-        return "Invalid replyTo or content or Authorization", 400
-    # check studentID in database
-    if dbs.UserDB.query.filter_by(student_id=studentID).scalar() is None:
-        return "Invalid replyTo or content or Authorization", 400
-
+def create_entry():
+    student_id = request.headers.get("x-uq-user", None)
     content = request.args.get("content", None)
+    reply_to = request.args.get("reply_to", None)
+
+    if not student_id:
+        return "Missing x-uq-user header", HTTPStatus.UNAUTHORIZED
+    
     if not content:
-        return "Invalid replyTo or content or Authorization", 400
+        return "Missing content query parameter", HTTPStatus.BAD_REQUEST
 
-    replyTo = request.args.get("replyTo", None)
-    # check replyTo is valid
-    if replyTo is not None and (not replyTo.isdigit() or
-            dbs.Epost.query.filter_by(post_id=int(replyTo)).scalar() is None):
-        return "Invalid replyTo or content or Authorization", 400
+    # The user making the entry must be in the database
+    if User.query.get(student_id) is None:
+        return "User not in database", HTTPStatus.BAD_REQUEST
 
-    # create an entry
-    row = dbs.Epost(reply_id=replyTo, author_id=studentID, content=content,
-            create_date=datetime.now())
+    # If this is a reply to an entry, the parent entry must exist
+    if reply_to is not None and Entry.query.get(reply_to) is None:
+        return "reply_to is invalid or does not exist", HTTPStatus.BAD_REQUEST
 
-    dbs.db.session.add(row)
-    dbs.db.session.commit()
+    # Create the entry
+    row = Entry(reply_id=reply_to, 
+                author_id=student_id, 
+                content=content,
+                created_at=datetime.now())
 
-    entry = dbs.Epost.query.filter_by(post_id=row.post_id).first()
+    db.session.add(row)
+    db.session.commit()
 
-    # append list of liked_by
-    liked_by = []
-    for like in entry.likes:
-        user = like.user
-        liked_by.append(models.UserModel(username=user.student_id,
-            name=user.student_name, user_id=user.student_id,
-            created_at=user.create_date))
+    entry = Entry.query.get(row.id)
+    if entry is None:
+        return None, HTTPStatus.INTERNAL_SERVER_ERROR
 
-    replies = [r.post_id for r in entry.replies]
+    response = create_entry_model(entry)
 
-    user = entry.author
-    author = models.UserModel(username=user.student_id,
-        name=user.student_name, user_id=user.student_id,
-        created_at=user.create_date)
-
-    result = models.EntryModel(created_at=entry.create_date,
-            reply_to=entry.reply_id,
-            content=entry.content, liked_by=liked_by,
-            replies=replies, author=author,
-            entry_id=entry.post_id)
-    return models.EntryModel.schema()().jsonify(result), 200
+    return EntryModel.schema()().jsonify(response), HTTPStatus.CREATED
 
 
-@api_register.route('/entry/<int:entryID>', methods=["GET","DELETE"])
+
+@api_register.route('/entry/<int:entry_id>', methods=["GET","DELETE"])
 @swag_from({
     'tags': ['Entry'],
     'parameters': [{
         'in': 'path',
-        'name': 'entryID',
+        'name': 'entry_id',
         'type': 'int',
         'required': 'true'
     }],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Gets the entry by the specified id',
-            'schema': models.EntryModel.schema()
+            'schema': EntryModel.schema()
         }
     }
 })
-def entry_id(entryID: int):
-    entry = dbs.Epost.query.filter_by(post_id=entryID).first()
+def get_entry(entry_id: int):
+    entry = Entry.query.get(entry_id)
     if entry is None:
-        return "entryID not found", 404
+        return "entry_id not found", HTTPStatus.BAD_REQUEST
 
-    # append list of liked_by
-    liked_by = []
-    for like in entry.likes:
-        user = like.user
-        liked_by.append(models.UserModel(username=user.student_id,
-            name=user.student_name, user_id=user.student_id,
-            created_at=user.create_date))
-
-    replies = [r.post_id for r in entry.replies]
-
-    user = entry.author
-    author = models.UserModel(username=user.student_id,
-        name=user.student_name, user_id=user.student_id,
-        created_at=user.create_date)
-
-    result = models.EntryModel(created_at=entry.create_date,
-            reply_to=entry.reply_id,
-            content=entry.content, liked_by=liked_by,
-            replies=replies, author=author,
-            entry_id=entry.post_id)
+    response = create_entry_model(entry)
 
     if request.method == "DELETE":
-        studentID = request.headers.get("x-uq-user", None)
-        if studentID is None or studentID != user.student_id:
-            return "Invalid Authorization", 400
-        dbs.db.session.delete(entry)
-        dbs.db.session.commit()
+        student_id = request.headers.get("x-uq-user", None)
+        if student_id is None or student_id != entry.author_id:
+            return "Invalid x-uq-user", HTTPStatus.UNAUTHORIZED
+        db.session.delete(entry)
+        db.session.commit()
+
+        return '', HTTPStatus.NO_CONTENT
         
-    return models.EntryModel.schema()().jsonify(result), 200
+    return EntryModel.schema()().jsonify(response), HTTPStatus.OK
 
 
-@api_register.route('/entry/replies', methods=["GET"])
-@swag_from({
-    'tags': ['Entry'],
-    'parameters': [
-    swag_param(PARAM_IN.QUERY, "entryID", int),
-    ],
-    'responses': {
-        HTTPStatus.OK.value: {
-            'description': 'Gets a list of entries which are replies to the entryID',
-            'schema': models.EntryModel.schema()
-        },
-        400: {
-            'description': 'Invalid entryID',
-        }
-    }
-})
-def entry_id_replies():
-    entryID = request.args.get("entryID", None)
-    if entryID is None or not entryID.isdigit():
-        return "Invalid entryID", 400
-
-    entry = dbs.Epost.query.filter_by(post_id=entryID).first()
-    if entry is None:
-        return "entryID not found", 404
-
-    result = []
-
-    for r in entry.replies:
-        liked_by = []
-        for like in r.likes:
-            user = like.user
-            liked_by.append({"username":user.student_id,
-                    "name":user.student_name, "user_id":user.student_id,
-                    "created_at":user.create_date})
-
-        replies = [rr.post_id for rr in r.replies]
-
-        user = r.author
-        author = { "username": user.student_id,
-                "name": user.student_name, "user_id": user.student_id,
-                "created_at": user.create_date }
-
-        result.append({"created_at": r.create_date,
-            "reply_to": r.reply_id,
-            "content": r.content, "liked_by": liked_by,
-            "replies": replies, "author": author,
-            "entry_id": r.post_id})
-
-    return flask.json.jsonify(result), 200
-
-
-@api_register.route('/entry/like/<int:entryID>', methods=["POST"])
+@api_register.route('/entry/replies/<int:entry_id>', methods=["GET"])
 @swag_from({
     'tags': ['Entry'],
     'parameters': [{
         'in': 'path',
-        'name': 'entryID',
+        'name': 'entry_id',
+        'type': 'int',
+        'required': 'true'
+    }],
+    'responses': {
+        HTTPStatus.OK.value: {
+            'description': 'Gets a list of entries which are replies to the entry_id',
+            'schema': EntryModel.schema()
+        },
+        400: {
+            'description': 'Invalid entry_id',
+        }
+    }
+})
+def get_entry_replies(entry_id: int):
+    entry = Entry.query.get(entry_id)
+    if entry is None:
+        return "Entry not found", HTTPStatus.BAD_REQUEST
+
+    result = [create_entry_model(r) for r in entry.replies.order_by(Entry.created_at.desc())]
+
+    return EntryModel.schema()().jsonify(result, many=True), HTTPStatus.OK
+
+
+@api_register.route('/entry/like/<int:entry_id>', methods=["POST"])
+@swag_from({
+    'tags': ['Entry'],
+    'parameters': [{
+        'in': 'path',
+        'name': 'entry_id',
         'type': 'int',
         'required': 'true'
     }],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Like the specified entry',
-            'schema': models.EntryModel.schema()
+            'schema': EntryModel.schema()
         },
         400: {
-            'description': 'Invalid Authorization',
+            'description': 'Invalid x-uq-user',
         },
         404: {
-            'description': 'entryID not found',
+            'description': 'entry_id not found',
         },
     }
 })
-def like_entry(entryID: int):
-    entry = dbs.Epost.query.filter_by(post_id=entryID).first()
+def like_entry(entry_id: int):
+    student_id = request.headers.get("x-uq-user", None)
+    if not student_id:
+        return "Invalid x-uq-user", HTTPStatus.BAD_REQUEST
+
+    entry = Entry.query.get(entry_id)
     if entry is None:
-        return "entryID not found", 404
+        return "Entry not found", HTTPStatus.NOT_FOUND
 
-    studentID = request.headers.get("x-uq-user", None)
-    if not studentID:
-        return "Invalid Authorization", 400
-    # check studentID in database
-    if dbs.UserDB.query.filter_by(student_id=studentID).scalar() is None:
-        return "Invalid Authorization", 400
+    # check student_id in database
+    if User.query.get(student_id) is None:
+        return "Invalid x-uq-user", HTTPStatus.BAD_REQUEST
 
-    # check entry doesn't already exist
-    if dbs.Liked.query.filter_by(post_id=entryID, user_id=studentID).scalar() is None:
-        # create an entry
-        row = dbs.Liked(post_id=entryID, user_id=studentID)
+    liked = Liked.query.get((entry_id, student_id))
+    # Ignore duplicate entries
+    if liked is None:
+        row = Liked(entry_id=entry_id, user_id=student_id)
 
-        dbs.db.session.add(row)
-        dbs.db.session.commit()
+        db.session.add(row)
+        db.session.commit()
 
-    # append list of liked_by
-    liked_by = []
-    for like in entry.likes:
-        user = like.user
-        liked_by.append(models.UserModel(username=user.student_id,
-            name=user.student_name, user_id=user.student_id,
-            created_at=user.create_date))
+    response = create_entry_model(entry)
 
-    replies = [r.post_id for r in entry.replies]
+    return EntryModel.schema()().jsonify(response), HTTPStatus.OK
 
-    user = entry.author
-    author = models.UserModel(username=user.student_id,
-        name=user.student_name, user_id=user.student_id,
-        created_at=user.create_date)
-
-    result = models.EntryModel(created_at=entry.create_date,
-            reply_to=entry.reply_id,
-            content=entry.content, liked_by=liked_by,
-            replies=replies, author=author,
-            entry_id=entry.post_id)
-
-    return models.EntryModel.schema()().jsonify(result), 200
-
-@api_register.route('/entry/unlike/<int:entryID>', methods=["POST"])
+@api_register.route('/entry/unlike/<int:entry_id>', methods=["POST"])
 @swag_from({
     'tags': ['Entry'],
     'parameters': [{
         'in': 'path',
-        'name': 'entryID',
+        'name': 'entry_id',
         'type': 'int',
         'required': 'true'
     }],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Unlike the specified entry',
-            'schema': models.EntryModel.schema()
+            'schema': EntryModel.schema()
         }
     }
 })
-def unlike_entry(entryID: int):
-    entry = dbs.Epost.query.filter_by(post_id=entryID).first()
+def unlike_entry(entry_id: int):
+    student_id = request.headers.get("x-uq-user", None)
+    if not student_id:
+        return "Invalid x-uq-user", HTTPStatus.BAD_REQUEST
+
+    entry = Entry.query.get(entry_id)
     if entry is None:
-        return "entryID not found", 404
+        return "Entry not found", HTTPStatus.NOT_FOUND
 
-    studentID = request.headers.get("x-uq-user", None)
-    if not studentID:
-        return "Invalid Authorization", 400
-    # check studentID in database
-    if dbs.UserDB.query.filter_by(student_id=studentID).scalar() is None:
-        return "Invalid Authorization", 400
-    like = dbs.Liked.query.filter_by(post_id=entryID, user_id=studentID).first()
-    # check entry doesn't already exist
-    if like is not None:
-        dbs.db.session.delete(like)
-        dbs.db.session.commit()
+    # check student_id in database
+    if User.query.get(student_id) is None:
+        return "Invalid x-uq-user", HTTPStatus.BAD_REQUEST
 
-    # append list of liked_by
+
+    liked = Liked.query.get((entry_id, student_id))
+    # Fail silently
+    if liked is not None:
+        row = Liked(entry_id=entry_id, user_id=student_id)
+
+        db.session.delete(liked)
+        db.session.commit()
+
+    response = create_entry_model(entry)
+
+    return EntryModel.schema()().jsonify(response), HTTPStatus.OK
+
+def create_entry_model(entry: Entry) -> EntryModel:
     liked_by = []
+
     for like in entry.likes:
-        user = like.user
-        liked_by.append(models.UserModel(username=user.student_id,
-            name=user.student_name, user_id=user.student_id,
-            created_at=user.create_date))
+        user = like.user  # type: User
+        liked_by.append(UserModel(username=user.id,
+                                  name=user.name, 
+                                  user_id=user.id,
+                                  created_at=user.created_at))
 
-    replies = [r.post_id for r in entry.replies]
+    replies = [r.id for r in entry.replies]
+    user = entry.author # type: User
 
-    user = entry.author
-    author = models.UserModel(username=user.student_id,
-        name=user.student_name, user_id=user.student_id,
-        created_at=user.create_date)
+    author = UserModel(username=user.id,
+                       name=user.name, 
+                       user_id=user.id,
+                       created_at=user.created_at)
 
-    result = models.EntryModel(created_at=entry.create_date,
-            reply_to=entry.reply_id,
-            content=entry.content, liked_by=liked_by,
-            replies=replies, author=author,
-            entry_id=entry.post_id)
+    result = EntryModel(created_at=entry.created_at,
+                        reply_to=entry.reply_id,
+                        content=entry.content, 
+                        liked_by=liked_by,
+                        replies=replies, 
+                        author=author,
+                        entry_id=entry.id)
 
-    return models.EntryModel.schema()().jsonify(result), 200
+    return result

@@ -1,18 +1,19 @@
 """Get tha news"""
 
-import json
-import flask
-from http import HTTPStatus
-from flasgger import swag_from
-import api.model as models
 from .api_register import api_register
 
 from datetime import datetime
+from flasgger import swag_from
+from functools import lru_cache
+from http import HTTPStatus
 from time import time
+
+import json
+import flask
 import urllib.request
 import xmltodict
 
-from functools import lru_cache
+from api.model import NewsModel
 
 UQNEWS_RSS_URL = 'http://www.uq.edu.au/news/rss/news_feed.xml'
 
@@ -22,42 +23,42 @@ UQNEWS_RSS_URL = 'http://www.uq.edu.au/news/rss/news_feed.xml'
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get a list of news items',
-            'schema': models.NewsModel.schema()
+            'schema': NewsModel.schema()
         }
     }
 })
 def news():
     res = refresh_news(time() // 60 // 60)
-    #return json.dumps(res, default=str), 200
-    # return models.NewsModel.schema()().jsonify(res), 200
-    return flask.json.jsonify(res), 200
+    #return json.dumps(res, default=str), HTTPStatus.OK
+    # return NewsModel.schema()().jsonify(res), HTTPStatus.OK
+    return flask.json.jsonify(res), HTTPStatus.OK
 
-@api_register.route('/news/<string:newsID>', methods=["GET"])
+@api_register.route('/news/<string:news_id>', methods=["GET"])
 @swag_from({
     'tags': ['News'],
     'parameters': [{
         'in': 'path',
-        'name': 'newsID',
+        'name': 'news_id',
         'type': 'string',
         'required': 'true'
     }],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get an individual news item',
-            'schema': models.NewsModel.schema()
+            'schema': NewsModel.schema()
         }
     }
 })
-def get_news(newsID: str):
+def get_news(news_id: str):
     res = refresh_news(time() // 60 // 60)
-    ret = next(filter(lambda x: x["news_id"] == newsID, res), None)
+    ret = next(filter(lambda x: x["news_id"] == news_id, res), None)
     print(ret)
     if ret:
         # XXX create NewsModel then jsonify
-        news = models.NewsModel(**ret)
-        return models.NewsModel.schema()().jsonify(news), 200
+        news = NewsModel(**ret)
+        return NewsModel.schema()().jsonify(news), HTTPStatus.OK
     else:
-        return "newsID not found", 404
+        return "news_id not found", HTTPStatus.NOT_FOUND
 
 @lru_cache(maxsize=2)
 def refresh_news(t):
@@ -75,7 +76,7 @@ def refresh_news(t):
         news_id = ''.join(c for c in i.get("guid") if c.isdigit())
         # XXX we're not using the NewsModel here since we need a list of such
         # objects
-        #news = models.NewsModel(created_at=created_at, url=i.get("link"),
+        #news = NewsModel(created_at=created_at, url=i.get("link"),
         #        content=i.get("description"), image_url=image_url,
         #        news_id=news_id, title=i.get("title"))
         news = {"created_at":created_at, "url":i.get("link"),

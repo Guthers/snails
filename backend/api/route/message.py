@@ -1,140 +1,106 @@
+from .api_register import api_register
+from .user import create_user_model
+
 from http import HTTPStatus
 from datetime import datetime
 from flasgger import swag_from
+from flask import request
 import itertools as it
-import api.model as models
-import api.db as dbs
-from .api_register import api_register
 
 import flask
-import json
-from flask import request
+
+from api.model import MessageModel, UserModel
+from api.db import db, Message, User 
+from utils.api_utils import safe_fail
 from utils.route_utils import swag_param, PARAM_IN
 
-@api_register.route('/messages/<string:userID>', methods=["GET"])
+@api_register.route('/messages/<string:user_id>', methods=["GET"])
 @swag_from({
     'tags': ['Message'],
     'parameters': [{
         'in': 'path',
-        'name': 'userID',
+        'name': 'user_id',
         'type': 'int',
         'required': 'true'
     }],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'List messages',
-            'schema': models.MessageModel.schema()
+            'schema': MessageModel.schema()
         },
         404: {
-            'description': 'userID not found',
+            'description': 'user_id not found',
         }
     }
 })
-def message_user_list(userID: str):
-    result = []
-    user = dbs.UserDB.query.filter_by(student_id=userID).first()
-    if not user:
-        return "userID not found", 404
+def get_messages(user_id: str):
+    student_id = request.headers.get("x-uq-user", None)
+    if student_id is None:
+        return "Missing x-uq-user header", HTTPStatus.UNAUTHORIZED
 
-    studentID = request.headers.get("x-uq-user", None)
-    if studentID != userID:
-        # search in user.messages_sent for messages to studentID
-        for message in it.chain((m for m in user.messages_sent if m.to_user_id ==
-            studentID), (m for m in user.messages_recv if m.from_user_id ==
-                studentID)):
-            # This is VERY ugly
-            userTo = message.to_user
-            resultTo = {"username":userTo.student_id,
-                    "name":userTo.student_name, "user_id":userTo.student_id,
-                    "created_at":userTo.create_date}
+    user = User.query.get(user_id)
+    if user is None:
+        return "user_id not found", HTTPStatus.NOT_FOUND
 
-            userFrom = message.from_user
-            resultFrom = {"username":userFrom.student_id,
-                    "name":userFrom.student_name, "user_id":userFrom.student_id,
-                    "created_at":userFrom.create_date}
-            result.append({"created_at": message.create_date, "to": resultTo,
-                "_from": resultFrom, "content": message.message_content,
-                "message_id": message.message_id})
-    else:
-        # return all user.messages_recv
-        for message in it.chain(user.messages_recv, user.messages_sent):
-            # This is VERY ugly
-            userTo = message.to_user
-            resultTo = {"username":userTo.student_id,
-                    "name":userTo.student_name, "user_id":userTo.student_id,
-                    "created_at":userTo.create_date}
+    sent = user.messages_sent.filter(Message.to_user_id == student_id)
+    recv = user.messages_recv.filter(Message.from_user_id == student_id)
+    messages = sent.union(recv).order_by(Message.created_at.desc())
 
-            userFrom = message.from_user
-            resultFrom = {"username":userFrom.student_id,
-                    "name":userFrom.student_name, "user_id":userFrom.student_id,
-                    "created_at":userFrom.create_date}
-            result.append({"created_at": message.create_date, "to": resultTo,
-                "_from": resultFrom, "content": message.message_content,
-                "message_id": message.message_id})
+    result = [create_message_model(m) for m in messages]
     
-    return flask.json.jsonify(result), 200
+    return MessageModel.schema()().jsonify(result, many=True), HTTPStatus.OK
 
-@api_register.route('/message/<int:messageID>', methods=["GET"])
+@api_register.route('/message/<int:message_id>', methods=["GET"])
 @swag_from({
     'tags': ['Message'],
-    'parameters': [{ 'in': 'path', 'name': 'messageID',
+    'parameters': [{ 'in': 'path', 'name': 'message_id',
         'type': 'int',
         'required': 'true'
     },
     {
         'in': 'header',
-        'name': 'Authorization',
+        'name': 'x-uq-user',
         'type': 'string',
         'required': 'false'
     }],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get an individual message item',
-            'schema': models.MessageModel.schema()
+            'schema': MessageModel.schema()
         },
         404: {
-            'description': 'messageID was not found',
+            'description': 'message_id was not found',
         },
         400: {
-            'description': 'Invalid Authorization',
+            'description': 'Invalid x-uq-user',
         }
     }
 })
-def message_id_get(messageID: int):
-    message = dbs.Umessage.query.filter_by(message_id=messageID).first()
+def get_message(message_id: int):
+    student_id = request.headers.get("x-uq-user", None)
 
-    # the order in which this happens gives attackers info
+    if not student_id:
+        return "Missing x-uq-user header", HTTPStatus.UNAUTHORIZED
+
+    message = Message.query.get(message_id)
+
     if not message:
-        return "messageID was not found", 404
+        return "Message not found", HTTPStatus.NOT_FOUND
 
-    studentID = request.headers.get("x-uq-user", None)
-    if not studentID or (message.from_user_id != studentID and
-            message.to_user_id != studentID):
-        return "Invalid Authorization", 400
+    if message.from_user_id != student_id and message.to_user_id != student_id:
+        return "Message not found", HTTPStatus.NOT_FOUND
 
-    userTo = dbs.UserDB.query.filter_by(student_id=message.to_user_id).first()
-    resultTo = models.UserModel(username=userTo.student_id,
-            name=userTo.student_name, user_id=userTo.student_id,
-            created_at=userTo.create_date)
+    result = create_message_model(message)
 
-    userFrom = dbs.UserDB.query.filter_by(student_id=message.from_user_id).first()
-    resultFrom = models.UserModel(username=userFrom.student_id,
-            name=userFrom.student_name, user_id=userFrom.student_id,
-            created_at=userFrom.create_date)
-
-    result = models.MessageModel(created_at=message.create_date, to=userTo,
-            _from=userFrom, content=message.message_content,
-            message_id=message.message_id)
-
-    return models.MessageModel.schema()().jsonify(result), 200
+    return MessageModel.schema()().jsonify(result), HTTPStatus.OK
 
 
-@api_register.route('/message/user/<string:userID>', methods=["POST"])
+@api_register.route('/message/user/<string:user_id>', methods=["POST"])
 @swag_from({
     'tags': ['Message'],
     'parameters': [{
         'in': 'path',
-        'name': 'userID',
+        'name': 'user_id',
         'type': 'string',
         'required': 'true'
         },
@@ -143,41 +109,47 @@ def message_id_get(messageID: int):
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Send a message to a user',
-            'schema': models.MessageModel.schema()
+            'schema': MessageModel.schema()
         },
         400: {
             'description': 'Missing username',
         }
     }
 })
-def message_id_send(userID: str):
-    studentID = request.headers.get("x-uq-user", None)
-    if not studentID:
-        return "Missing username", 400
 
-    if dbs.UserDB.query.filter_by(student_id=studentID).scalar() is None:
-        return "Missing username", 400
+def send_message(user_id: str):
+    student_id = request.headers.get("x-uq-user", None)
+    content = request.args.get("content")
 
-    row = dbs.Umessage(message_content=request.args.get("content",None),
-            from_user_id=studentID, to_user_id=userID,
-            create_date=datetime.now())
+    if not student_id:
+        return "Missing Authorization header", HTTPStatus.BAD_REQUEST
 
-    dbs.db.session.add(row)
-    dbs.db.session.commit()
+    if User.query.get(user_id) is None:
+        return "User does not exist", HTTPStatus.NOT_FOUND
+
+    row = Message(content=request.args.get("content",None),
+                  from_user_id=student_id, 
+                  to_user_id=user_id,
+                  created_at=datetime.now())
+
+    db.session.add(row)
+    db.session.commit()
+
     # retrieve from messagedb
-    message = dbs.Umessage.query.filter_by(message_id=row.message_id).first()
+    message = Message.query.get(row.id)
 
-    userTo = dbs.UserDB.query.filter_by(student_id=message.to_user_id).first()
-    resultTo = models.UserModel(username=userTo.student_id,
-            name=userTo.student_name, user_id=userTo.student_id,
-            created_at=userTo.create_date)
+    result = create_message_model(message)
 
-    userFrom = dbs.UserDB.query.filter_by(student_id=message.from_user_id).first()
-    resultFrom = models.UserModel(username=userFrom.student_id,
-            name=userFrom.student_name, user_id=userFrom.student_id,
-            created_at=userFrom.create_date)
+    return MessageModel.schema()().jsonify(result), HTTPStatus.OK
 
-    result = models.MessageModel(created_at=message.create_date, to=resultTo,
-            _from=resultFrom, content=message.message_content,
-            message_id=message.message_id)
-    return models.MessageModel.schema()().jsonify(result), 200
+def create_message_model(message: Message) -> MessageModel:
+    user_to = User.query.get(message.from_user_id)
+    user_from = User.query.get(message.to_user_id)
+
+    result = MessageModel(created_at=message.created_at,
+                          to=create_user_model(user_to),
+                          _from=create_user_model(user_from),
+                          content=message.content,
+                          message_id=message.id)
+    return result
+
