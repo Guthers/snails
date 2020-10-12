@@ -1,25 +1,31 @@
 # Backend - Python + Flask + SQLAlchemy
-## Stack
 
-## Project Structure
-### Setup
-Setup the project by running `pipenv install`. This should install any packages needed
-
-Harry has some issues, it was a bit picky
-    I had to add the alternatives for python->python3 and pip->pip3
+## Development
+Install all dependencies for the project by running `pipenv install`.
 
 ### Start
 `pipenv run python -m flask run`
 Visit http://localhost/api for the home api
 Visit http://localhost/apidocs for the swagger documentation
+
+### Populate Database
+`pipenv run python -m flask populate`
+
+will populate the database with users, entries and messages. 
+See `app.py` for specifics.
+
 ### Run Tests
 `pipenv run python -m unittest`
 
 
-### To Enable hot reload
-Add a file `./.env` with the following lines
+### Hot Reload
+Start the flask server with the following environment variables
 
+```
 FLASK_APP=app.py
 FLASK_ENV=development
+```
 
-Then run the code as normal
+You can either
+- Add a file `./.env` with the contents as above, or
+- Prepend the command with the env vars `NAME=VALUE python -m flask run` like so
