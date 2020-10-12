@@ -1,15 +1,14 @@
 from .db import db
 import datetime
 
-class UserDB(db.Model):
-    __tablename__="userdb"
-    student_id = db.Column(db.String(255), primary_key = True)
-    student_name = db.Column(db.String(255))
+class User(db.Model):
+    id = db.Column(db.String(255), primary_key = True)
+    name = db.Column(db.String(255))
     bio = db.Column(db.String(255)) # pretty sure this doesn't work
-    create_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    eposts = db.relationship('Epost', backref='author', lazy=True)
-    messages_sent = db.relationship('Umessage',
-            foreign_keys='Umessage.from_user_id', backref='from_user', lazy=True)
-    messages_recv = db.relationship('Umessage',
-            foreign_keys='Umessage.to_user_id', backref='to_user', lazy=True)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    entries = db.relationship('Entry', backref='author', lazy=True)
+    messages_sent = db.relationship('Message',
+            foreign_keys='Message.from_user_id', backref='from_user', lazy='dynamic')
+    messages_recv = db.relationship('Message',
+            foreign_keys='Message.to_user_id', backref='to_user', lazy='dynamic')
     likes = db.relationship("Liked", backref="user", lazy=True)
