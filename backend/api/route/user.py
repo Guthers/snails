@@ -8,11 +8,28 @@ from flasgger import swag_from
 import json
 
 from api.db import db, User
-from api.model import UserModel
+from api.model import UserModel, TokenResponse, LoginBody
 from api.guard import guard
+from utils.route_utils import swag_param, PARAM, VALUE
 
 
 @api_register.route('/user/login', methods=["POST"])
+@swag_from({
+    'tags': ['User'],
+    'parameters': [
+        {
+            'in': 'body',
+            'name': '',
+            'schema': LoginBody.schema()
+        }
+    ],
+    'responses': {
+        HTTPStatus.CREATED.value: {
+            'description': '',
+            'schema': TokenResponse.schema(),
+        },
+    }
+})
 def login():
     username = request.get_json(force=True).get('username', None)
     password = request.get_json(force=True).get('password', None)
@@ -24,6 +41,22 @@ def login():
 
 
 @api_register.route('/user/register', methods=["POST"])
+@swag_from({
+    'tags': ['User'],
+    'parameters': [
+        {
+            'in': 'body',
+            'name': '',
+            'schema': LoginBody.schema()
+        }
+    ],
+    'responses': {
+        HTTPStatus.CREATED.value: {
+            'description': '',
+            'schema': TokenResponse.schema(),
+        },
+    }
+})
 def register():
     username = request.get_json(force=True).get('username', None)
     password = request.get_json(force=True).get('password', None)
@@ -31,7 +64,7 @@ def register():
     exists = User.lookup(username) is not None
 
     if exists:
-        return "", HTTPStatus.NOT_FOUND
+        return "User already exists", HTTPStatus.CONFLICT
     user = User(username=username,
                 password=guard.hash_password(password),
                 created_at=datetime.now())
@@ -42,18 +75,15 @@ def register():
 
     result = {'access_token': guard.encode_jwt_token(user)}
 
-    return jsonify(result), HTTPStatus.OK
+    return jsonify(result), HTTPStatus.CREATED
 
 
 @api_register.route('/user/<string:username>', methods=["GET"])
 @swag_from({
     'tags': ['User'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'user_id',
-        'type': 'string',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.PATH, "username", VALUE.STRING),
+    ],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get user info',

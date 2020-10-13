@@ -4,6 +4,7 @@ from http import HTTPStatus
 from flasgger import swag_from
 
 from api.model import VehicleModel
+from utils.route_utils import swag_param, PARAM, VALUE
 
 @api_register.route('/transport', methods=["GET"])
 @swag_from({
@@ -23,12 +24,9 @@ def transport():
 @api_register.route('/transport/<int:transport_id>', methods=["GET"])
 @swag_from({
     'tags': ['Transport'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'transport_id',
-        'type': 'int',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.PATH, "transport_id", VALUE.INTEGER)
+    ],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get an individual transport item',

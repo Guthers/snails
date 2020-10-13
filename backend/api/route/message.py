@@ -11,17 +11,15 @@ import flask
 
 from api.model import MessageModel, UserModel
 from api.db import db, Message, User 
-from utils.route_utils import swag_param, PARAM_IN
+from utils.route_utils import swag_param, PARAM, VALUE
 
-@api_register.route('/messages/<string:user_id>', methods=["GET"])
+@api_register.route('/messages/<int:user_id>', methods=["GET"])
 @swag_from({
     'tags': ['Message'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'user_id',
-        'type': 'int',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.HEADER, "Authorization", VALUE.INTEGER),
+        swag_param(PARAM.PATH, "user_id", VALUE.INTEGER),
+    ],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'List messages',
@@ -33,7 +31,7 @@ from utils.route_utils import swag_param, PARAM_IN
     }
 })
 @auth_required
-def get_messages(user_id: str):
+def get_messages(user_id: int):
     user = current_user()
 
     sent = user.messages_sent.filter(Message.to_user_id == user_id)
@@ -47,16 +45,10 @@ def get_messages(user_id: str):
 @api_register.route('/message/<int:message_id>', methods=["GET"])
 @swag_from({
     'tags': ['Message'],
-    'parameters': [{ 'in': 'path', 'name': 'message_id',
-        'type': 'int',
-        'required': 'true'
-    },
-    {
-        'in': 'header',
-        'name': 'x-uq-user',
-        'type': 'string',
-        'required': 'false'
-    }],
+    'parameters': [
+        swag_param(PARAM.HEADER, "Authorization", VALUE.STRING),
+        swag_param(PARAM.PATH, "message_id", VALUE.INTEGER),
+    ],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get an individual message item',
@@ -87,16 +79,13 @@ def get_message(message_id: int):
     return MessageModel.schema()().jsonify(result), HTTPStatus.OK
 
 
-@api_register.route('/message/user/<string:user_id>', methods=["POST"])
+@api_register.route('/message/user/<int:user_id>', methods=["POST"])
 @swag_from({
     'tags': ['Message'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'user_id',
-        'type': 'string',
-        'required': 'true'
-        },
-        swag_param(PARAM_IN.QUERY, "content", str)
+    'parameters': [
+        swag_param(PARAM.HEADER, "Authorization", VALUE.STRING),
+        swag_param(PARAM.PATH, "user_id", VALUE.INTEGER),
+        swag_param(PARAM.QUERY, "content", VALUE.STRING)
     ],
     'responses': {
         HTTPStatus.OK.value: {
@@ -109,11 +98,14 @@ def get_message(message_id: int):
     }
 })
 @auth_required
-def send_message(user_id: str):
+def send_message(user_id: int):
     user = current_user()
-    content = request.args.get("content")
+    content = request.args.get("content", None)
 
-    row = Message(content=request.args.get("content",None),
+    if content is None:
+        return "Missing content query", HTTPStatus.BAD_REQUEST
+
+    row = Message(content=content,
                   from_user_id=user.id, 
                   to_user_id=user_id,
                   created_at=datetime.now())

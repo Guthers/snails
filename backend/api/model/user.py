@@ -27,3 +27,12 @@ class UserModel(AbstractModel):
         self.username = username
         self.name = name
         self.user_id = user_id
+
+class TokenResponse(AbstractModel):
+    def __init__(self, access_token: str):
+        self.access_token = access_token
+
+class LoginBody(AbstractModel):
+    def __init__(self, username: str, password: str):
+        self.username = username
+        self.password = password

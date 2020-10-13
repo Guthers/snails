@@ -1,15 +1,25 @@
 from enum import Enum
 
 
-class PARAM_IN(Enum):
+class PARAM(Enum):
     PATH = "path"
     QUERY = "query"
+    HEADER = "header"
+    BODY = "body"
+    DATA = "formData"
+
+class VALUE(Enum):
+    STRING = "string"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    INTEGER = "integer"
+    ARRAY = "array"
 
 
-def swag_param(param_in: PARAM_IN, name: str, type: type, required=True):
+def swag_param(param: PARAM, name: str, type_: VALUE, required=True):
     return {
-        'in': param_in.value,
+        'in': param.value,
         'name': name,
-        'type': type.__name__,
-        'required': str(required).lower()
+        'type': type_.value,
+        'required': required
     }

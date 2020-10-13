@@ -14,6 +14,7 @@ import urllib.request
 import xmltodict
 
 from api.model import NewsModel
+from utils.route_utils import swag_param, PARAM, VALUE
 
 UQNEWS_RSS_URL = 'http://www.uq.edu.au/news/rss/news_feed.xml'
 
@@ -36,12 +37,9 @@ def news():
 @api_register.route('/news/<string:news_id>', methods=["GET"])
 @swag_from({
     'tags': ['News'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'news_id',
-        'type': 'string',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.PATH, "news_id", VALUE.INTEGER)
+    ],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get an individual news item',

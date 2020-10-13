@@ -5,15 +5,15 @@ from flasgger import swag_from
 from flask import request
 
 from api.model import MapModel
-from utils.route_utils import swag_param, PARAM_IN
+from utils.route_utils import swag_param, PARAM, VALUE
 
 
 @api_register.route('/maps', methods=["GET"])
 @swag_from({
     'tags': ['Maps'],
     'parameters': [
-        swag_param(PARAM_IN.QUERY, "lat", float),
-        swag_param(PARAM_IN.QUERY, "lng", float)],
+        swag_param(PARAM.QUERY, "lat", VALUE.STRING),
+        swag_param(PARAM.QUERY, "lng", VALUE.STRING)],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get a map link',
@@ -29,12 +29,9 @@ def maps():
 @api_register.route('/maps/board', methods=["GET"])
 @swag_from({
     'tags': ['Maps'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'board_id',
-        'type': 'int',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.QUERY, "board_id", VALUE.STRING),
+    ],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get an individual maps item',

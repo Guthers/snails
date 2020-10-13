@@ -11,28 +11,21 @@ import flask
 
 from api.db import db, Entry, Liked, User
 from api.model import EntryModel, UserModel
-from utils.route_utils import swag_param, PARAM_IN
+from utils.route_utils import swag_param, PARAM, VALUE
 
 @api_register.route('/entry', methods=["POST"])
 @swag_from({
     'tags': ['Entry'],
-    'parameters': [{
-        'in': 'header',
-        'name': 'x-uq-user',
-        'type': 'string',
-        'required': 'true'
-    },
-    swag_param(PARAM_IN.QUERY, "content", str),
-    swag_param(PARAM_IN.QUERY, "reply_to", int),
+    'parameters': [
+        swag_param(PARAM.HEADER, "Authorization", VALUE.STRING),
+        swag_param(PARAM.QUERY, "content", VALUE.STRING),
+        swag_param(PARAM.QUERY, "reply_to", VALUE.INTEGER, required=False),
     ],
     'responses': {
-        HTTPStatus.OK.value: {
+        HTTPStatus.CREATED.value: {
             'description': 'Creates an entry',
             'schema': EntryModel.schema()
         },
-        400: {
-            'description': 'Invalid reply_to or content or x-uq-user',
-        }
     }
 })
 @auth_required
@@ -50,17 +43,13 @@ def create_entry():
         return "reply_to is invalid or does not exist", HTTPStatus.BAD_REQUEST
 
     # Create the entry
-    row = Entry(reply_id=reply_to, 
+    entry = Entry(reply_id=reply_to, 
                 author_id=user.id, 
                 content=content,
                 created_at=datetime.now())
 
-    db.session.add(row)
+    db.session.add(entry)
     db.session.commit()
-
-    entry = Entry.query.get(row.id)
-    if entry is None:
-        return None, HTTPStatus.INTERNAL_SERVER_ERROR
 
     response = create_entry_model(entry)
 
@@ -71,24 +60,9 @@ def create_entry():
 @swag_from({
     'tags': ['Entry'],
     'parameters': [
-        {
-        'in': 'path',
-        'name': 'count',
-        'type': 'int',
-        'required': 'false'
-        },
-        {
-        'in': 'path',
-        'name': 'before[id]',
-        'type': 'entry_id',
-        'required': 'false'
-        },
-        {
-        'in': 'path',
-        'name': 'after[id]',
-        'type': 'entry_id',
-        'required': 'false'
-        },
+        swag_param(PARAM.QUERY, "count", VALUE.INTEGER, required=False),
+        swag_param(PARAM.QUERY, "before[id]", VALUE.INTEGER, required=False),
+        swag_param(PARAM.QUERY, "after[id]", VALUE.INTEGER, required=False),
     ],
     'responses': {
         HTTPStatus.OK.value: {
@@ -131,15 +105,12 @@ def get_entries():
 @api_register.route('/entry/<int:entry_id>', methods=["GET"])
 @swag_from({
     'tags': ['Entry'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'entry_id',
-        'type': 'int',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.PATH, "entry_id", VALUE.INTEGER),
+    ],
     'responses': {
         HTTPStatus.OK.value: {
-            'description': 'Gets the entry by the specified id',
+            'description': 'Get entry',
             'schema': EntryModel.schema()
         }
     }
@@ -154,8 +125,21 @@ def get_entry(entry_id: int):
     return EntryModel.schema()().jsonify(response), HTTPStatus.OK
 
 @api_register.route('/entry/<int:entry_id>', methods=["DELETE"])
+@swag_from({
+    'tags': ['Entry'],
+    'parameters': [
+        swag_param(PARAM.HEADER, "Authorization", VALUE.STRING),
+        swag_param(PARAM.PATH, "entry_id", VALUE.INTEGER),
+    ],
+    'responses': {
+        HTTPStatus.NO_CONTENT.value: {
+            'description': 'Delete entry',
+            'schema': EntryModel.schema()
+        }
+    }
+})
 @auth_required
-def delete_entry(entry_id: int):
+def delete_entry(entry_id: VALUE.INTEGER):
     user = current_user()
 
     entry = Entry.query.get(entry_id)
@@ -175,20 +159,14 @@ def delete_entry(entry_id: int):
 @api_register.route('/entry/replies/<int:entry_id>', methods=["GET"])
 @swag_from({
     'tags': ['Entry'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'entry_id',
-        'type': 'int',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.PATH, "entry_id", VALUE.INTEGER),
+    ],
     'responses': {
         HTTPStatus.OK.value: {
-            'description': 'Gets a list of entries which are replies to the entry_id',
+            'description': 'Get replies',
             'schema': EntryModel.schema()
         },
-        400: {
-            'description': 'Invalid entry_id',
-        }
     }
 })
 def get_entry_replies(entry_id: int):
@@ -204,22 +182,14 @@ def get_entry_replies(entry_id: int):
 @api_register.route('/entry/like/<int:entry_id>', methods=["POST"])
 @swag_from({
     'tags': ['Entry'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'entry_id',
-        'type': 'int',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.HEADER, "Authorization", VALUE.STRING),
+        swag_param(PARAM.PATH, "entry_id", VALUE.INTEGER),
+    ],
     'responses': {
         HTTPStatus.OK.value: {
-            'description': 'Like the specified entry',
+            'description': 'Like entry',
             'schema': EntryModel.schema()
-        },
-        400: {
-            'description': 'Invalid x-uq-user',
-        },
-        404: {
-            'description': 'entry_id not found',
         },
     }
 })
@@ -247,15 +217,13 @@ def like_entry(entry_id: int):
 @api_register.route('/entry/unlike/<int:entry_id>', methods=["POST"])
 @swag_from({
     'tags': ['Entry'],
-    'parameters': [{
-        'in': 'path',
-        'name': 'entry_id',
-        'type': 'int',
-        'required': 'true'
-    }],
+    'parameters': [
+        swag_param(PARAM.HEADER, "Authorization", VALUE.STRING),
+        swag_param(PARAM.PATH, "entry_id", VALUE.INTEGER),
+    ],
     'responses': {
         HTTPStatus.OK.value: {
-            'description': 'Unlike the specified entry',
+            'description': 'Unlike entry',
             'schema': EntryModel.schema()
         }
     }
@@ -272,8 +240,6 @@ def unlike_entry(entry_id: int):
     liked = Liked.query.get((entry_id, user.id))
     # Fail silently
     if liked is not None:
-        row = Liked(entry_id=entry_id, user_id=user.id)
-
         db.session.delete(liked)
         db.session.commit()
 
