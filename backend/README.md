@@ -29,3 +29,10 @@ FLASK_ENV=development
 You can either
 - Add a file `./.env` with the contents as above, or
 - Prepend the command with the env vars `NAME=VALUE python -m flask run` like so
+
+## Deploy
+
+Clone this directory and run `deploy.sh`.
+
+Alternatively, simply `ssh` into the box and
+run the same command at `/home/s4529551/deploy.sh`
