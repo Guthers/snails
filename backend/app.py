@@ -15,8 +15,7 @@ def create_app():
     }
     swagger = Swagger(app)
 
-    #app.config['SQLALCHEMY_DATABASE_URI'] = CONNECTION_STRING
-    if "SNAIL_DEV_SERVER" in os.environ:
+    if app.config['ENV'] == 'production':
         DBM = "mysql+pymysql"
         HST = "localhost"
         DTB = "snails"
