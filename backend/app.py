@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flasgger import Swagger
 from argparse import ArgumentParser
 
-
 def create_app():
     app = Flask(__name__)
 
@@ -31,6 +30,11 @@ def create_app():
     # this is to shut up a warning and is PROBABLY fine
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    app.config['SECRET_KEY'] = 'top secret'
+    app.config['JWT_ACCESS_LIFESPAN'] = {'hours': 24}
+    app.config['JWT_REFRESH_LIFESPAN'] = {'days': 30}
+
+
     return app
 
 
@@ -45,6 +49,7 @@ app.register_blueprint(api_register, url_prefix='/api')
 def populate_db():
     from datetime import datetime
     from api.db import db, Entry, Message, User
+    from api.guard import guard
 
     # Drop tables
     db.drop_all()
@@ -52,16 +57,23 @@ def populate_db():
     # Create tables
     db.create_all()
 
+    print("Creating test user hooty...")
+    print("Creating test user amityblight...")
+    print("Creating test user theowllady...")
+    print("Creating test user itsgus...")
+    pwd = str(input("Enter password for test users: "))
+
     # Create users
-    user_hooty = User(id="s100", name="Hooty", created_at=datetime.now())
-    user_amity = User(id="s101", name="Amity Blight", created_at=datetime.now())
-    user_eda = User(id="s102", name="Eda Clawthorne", created_at=datetime.now())
-    user_gus = User(id="s103", name="Gus", created_at=datetime.now())
+    user_hooty = User(username="hooty", password=guard.hash_password(pwd), name="Hooty", created_at=datetime.now())
+    user_amity = User(username="amityblight", password=guard.hash_password(pwd), name="Amity Blight", created_at=datetime.now())
+    user_eda = User(username="theowllady", password=guard.hash_password(pwd), name="Eda Clawthorne", created_at=datetime.now())
+    user_gus = User(username="itsgus", password=guard.hash_password(pwd), name="Gus", created_at=datetime.now())
 
     db.session.add(user_hooty)
     db.session.add(user_amity)
     db.session.add(user_eda)
     db.session.add(user_gus)
+    db.session.commit()
 
     # Create entries
     content_amity = ["Where can I get style guides and advice on presentation, referencing and citation?",

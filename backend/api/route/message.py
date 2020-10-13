@@ -5,7 +5,7 @@ from http import HTTPStatus
 from datetime import datetime
 from flasgger import swag_from
 from flask import request
-import itertools as it
+from flask_praetorian import auth_required, current_user
 
 import flask
 
@@ -32,17 +32,12 @@ from utils.route_utils import swag_param, PARAM_IN
         }
     }
 })
+@auth_required
 def get_messages(user_id: str):
-    student_id = request.headers.get("x-uq-user", None)
-    if student_id is None:
-        return "Missing x-uq-user header", HTTPStatus.UNAUTHORIZED
+    user = current_user()
 
-    user = User.query.get(user_id)
-    if user is None:
-        return "user_id not found", HTTPStatus.NOT_FOUND
-
-    sent = user.messages_sent.filter(Message.to_user_id == student_id)
-    recv = user.messages_recv.filter(Message.from_user_id == student_id)
+    sent = user.messages_sent.filter(Message.to_user_id == user_id)
+    recv = user.messages_recv.filter(Message.from_user_id == user_id)
     messages = sent.union(recv).order_by(Message.created_at.desc())
 
     result = [create_message_model(m) for m in messages]
@@ -75,18 +70,16 @@ def get_messages(user_id: str):
         }
     }
 })
+@auth_required
 def get_message(message_id: int):
-    student_id = request.headers.get("x-uq-user", None)
-
-    if not student_id:
-        return "Missing x-uq-user header", HTTPStatus.UNAUTHORIZED
+    user = current_user()
 
     message = Message.query.get(message_id)
 
     if not message:
         return "Message not found", HTTPStatus.NOT_FOUND
 
-    if message.from_user_id != student_id and message.to_user_id != student_id:
+    if message.from_user_id != user.id and message.to_user_id != user.id:
         return "Message not found", HTTPStatus.NOT_FOUND
 
     result = create_message_model(message)
@@ -115,19 +108,13 @@ def get_message(message_id: int):
         }
     }
 })
-
+@auth_required
 def send_message(user_id: str):
-    student_id = request.headers.get("x-uq-user", None)
+    user = current_user()
     content = request.args.get("content")
 
-    if not student_id:
-        return "Missing Authorization header", HTTPStatus.BAD_REQUEST
-
-    if User.query.get(user_id) is None:
-        return "User does not exist", HTTPStatus.NOT_FOUND
-
     row = Message(content=request.args.get("content",None),
-                  from_user_id=student_id, 
+                  from_user_id=user.id, 
                   to_user_id=user_id,
                   created_at=datetime.now())
 

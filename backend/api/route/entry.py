@@ -4,6 +4,7 @@ from http import HTTPStatus
 from datetime import datetime
 from flasgger import swag_from
 from flask import request
+from flask_praetorian import auth_required, current_user
 from typing import Tuple, List
 
 import flask
@@ -34,20 +35,15 @@ from utils.route_utils import swag_param, PARAM_IN
         }
     }
 })
+@auth_required
 def create_entry():
-    student_id = request.headers.get("x-uq-user", None)
     content = request.args.get("content", None)
     reply_to = request.args.get("reply_to", None)
 
-    if not student_id:
-        return "Missing x-uq-user header", HTTPStatus.UNAUTHORIZED
-    
     if not content:
         return "Missing content query parameter", HTTPStatus.BAD_REQUEST
 
-    # The user making the entry must be in the database
-    if User.query.get(student_id) is None:
-        return "User not in database", HTTPStatus.BAD_REQUEST
+    user = current_user() # type: User
 
     # If this is a reply to an entry, the parent entry must exist
     if reply_to is not None and Entry.query.get(reply_to) is None:
@@ -55,7 +51,7 @@ def create_entry():
 
     # Create the entry
     row = Entry(reply_id=reply_to, 
-                author_id=student_id, 
+                author_id=user.id, 
                 content=content,
                 created_at=datetime.now())
 
@@ -132,7 +128,7 @@ def get_entries():
     return EntryModel.schema()().jsonify(response, many=True), HTTPStatus.OK
 
 
-@api_register.route('/entry/<int:entry_id>', methods=["GET","DELETE"])
+@api_register.route('/entry/<int:entry_id>', methods=["GET"])
 @swag_from({
     'tags': ['Entry'],
     'parameters': [{
@@ -154,17 +150,26 @@ def get_entry(entry_id: int):
         return "entry_id not found", HTTPStatus.BAD_REQUEST
 
     response = create_entry_model(entry)
-
-    if request.method == "DELETE":
-        student_id = request.headers.get("x-uq-user", None)
-        if student_id is None or student_id != entry.author_id:
-            return "Invalid x-uq-user", HTTPStatus.UNAUTHORIZED
-        db.session.delete(entry)
-        db.session.commit()
-
-        return '', HTTPStatus.NO_CONTENT
         
     return EntryModel.schema()().jsonify(response), HTTPStatus.OK
+
+@api_register.route('/entry/<int:entry_id>', methods=["DELETE"])
+@auth_required
+def delete_entry(entry_id: int):
+    user = current_user()
+
+    entry = Entry.query.get(entry_id)
+    if entry is None:
+        return "entry_id not found", HTTPStatus.BAD_REQUEST
+
+    if user != entry.author_id:
+        return "Unauthorized", HTTPStatus.UNAUTHORIZED
+    
+    db.session.delete(entry)
+    db.session.commit()
+
+    return '', HTTPStatus.NO_CONTENT
+
 
 
 @api_register.route('/entry/replies/<int:entry_id>', methods=["GET"])
@@ -218,23 +223,19 @@ def get_entry_replies(entry_id: int):
         },
     }
 })
+@auth_required
 def like_entry(entry_id: int):
-    student_id = request.headers.get("x-uq-user", None)
-    if not student_id:
-        return "Invalid x-uq-user", HTTPStatus.BAD_REQUEST
+    user = current_user() # type: User
 
     entry = Entry.query.get(entry_id)
     if entry is None:
         return "Entry not found", HTTPStatus.NOT_FOUND
 
-    # check student_id in database
-    if User.query.get(student_id) is None:
-        return "Invalid x-uq-user", HTTPStatus.BAD_REQUEST
 
-    liked = Liked.query.get((entry_id, student_id))
+    liked = Liked.query.get((entry_id, user.id))
     # Ignore duplicate entries
     if liked is None:
-        row = Liked(entry_id=entry_id, user_id=student_id)
+        row = Liked(entry_id=entry_id, user_id=user.id)
 
         db.session.add(row)
         db.session.commit()
@@ -259,24 +260,19 @@ def like_entry(entry_id: int):
         }
     }
 })
+@auth_required
 def unlike_entry(entry_id: int):
-    student_id = request.headers.get("x-uq-user", None)
-    if not student_id:
-        return "Invalid x-uq-user", HTTPStatus.BAD_REQUEST
+    user = current_user()
 
     entry = Entry.query.get(entry_id)
     if entry is None:
         return "Entry not found", HTTPStatus.NOT_FOUND
 
-    # check student_id in database
-    if User.query.get(student_id) is None:
-        return "Invalid x-uq-user", HTTPStatus.BAD_REQUEST
 
-
-    liked = Liked.query.get((entry_id, student_id))
+    liked = Liked.query.get((entry_id, user.id))
     # Fail silently
     if liked is not None:
-        row = Liked(entry_id=entry_id, user_id=student_id)
+        row = Liked(entry_id=entry_id, user_id=user.id)
 
         db.session.delete(liked)
         db.session.commit()
