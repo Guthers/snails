@@ -10,7 +10,7 @@ def create_app():
     app.config['SWAGGER'] = {
         'title': 'Snail API',
         'description': 'Endpoints for interacting the coolest snail backend.',
-        'version': "0.2.0"
+        'version': "0.3.0"
     }
     swagger = Swagger(app)
 
