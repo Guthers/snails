@@ -89,7 +89,7 @@ def get_entries():
 
     before = Entry.query.get(before_id)
     after = Entry.query.get(after_id)
-    subquery = Entry.query.order_by(Entry.created_at.desc())
+    subquery = Entry.query.order_by(Entry.created_at.desc()).filter(Entry.reply_id == None)
     if before: 
         subquery = subquery.filter(Entry.created_at < before.created_at)
     if after:
