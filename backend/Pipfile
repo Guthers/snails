@@ -13,6 +13,7 @@ pylint = "*"
 xmltodict = "*"
 marshmallow-sqlalchemy = "*"
 pymysql = "*"
+gtfslib = "*"
 
 [dev-packages]
 
