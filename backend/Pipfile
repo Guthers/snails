@@ -13,12 +13,9 @@ pylint = "*"
 xmltodict = "*"
 marshmallow-sqlalchemy = "*"
 pymysql = "*"
-<<<<<<< HEAD
 uwsgi = "*"
 flask-praetorian = "*"
-=======
 gtfslib = "*"
->>>>>>> transport
 
 [dev-packages]
 
