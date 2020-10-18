@@ -24,7 +24,10 @@ UQNEWS_RSS_URL = 'http://www.uq.edu.au/news/rss/news_feed.xml'
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get a list of news items',
-            'schema': NewsModel.schema()
+            'schema': {
+                "type": "array",
+                "items": NewsModel.schema()
+            }
         }
     }
 })

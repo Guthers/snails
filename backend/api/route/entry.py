@@ -67,7 +67,10 @@ def create_entry():
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Returns a list of entries in reverse-chronological order',
-            'schema': EntryModel.schema()
+            'schema': {
+                "type": "array",
+                "items": EntryModel.schema()
+            }
         }
     }
 })
@@ -165,7 +168,10 @@ def delete_entry(entry_id: VALUE.INTEGER):
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get replies',
-            'schema': EntryModel.schema()
+            'schema': {
+                "type": "array",
+                "items": EntryModel.schema()
+            }
         },
     }
 })

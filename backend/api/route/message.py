@@ -23,7 +23,10 @@ from utils.route_utils import swag_param, PARAM, VALUE
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'List messages',
-            'schema': MessageModel.schema()
+            'schema': {
+                "type": "array",
+                "items": MessageModel.schema()
+            }
         },
         404: {
             'description': 'user_id not found',
