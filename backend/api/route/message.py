@@ -1,11 +1,13 @@
 from .api_register import api_register
 from .user import create_user_model
 
-from http import HTTPStatus
+from collections import defaultdict
 from datetime import datetime
+from http import HTTPStatus
 from flasgger import swag_from
 from flask import request
 from flask_praetorian import auth_required, current_user
+from functools import reduce
 
 import flask
 
@@ -13,12 +15,11 @@ from api.model import MessageModel, UserModel
 from api.db import db, Message, User 
 from utils.route_utils import swag_param, PARAM, VALUE
 
-@api_register.route('/messages/<int:user_id>', methods=["GET"])
+@api_register.route('/messages', methods=["GET"])
 @swag_from({
     'tags': ['Message'],
     'parameters': [
         swag_param(PARAM.HEADER, "Authorization", VALUE.INTEGER),
-        swag_param(PARAM.PATH, "user_id", VALUE.INTEGER),
     ],
     'responses': {
         HTTPStatus.OK.value: {
@@ -34,7 +35,39 @@ from utils.route_utils import swag_param, PARAM, VALUE
     }
 })
 @auth_required
-def get_messages(user_id: int):
+def get_messages():
+    user = current_user()
+
+    sent = user.messages_sent
+    recv = user.messages_recv
+    messages = sent.union(recv).order_by(Message.created_at.desc())
+
+    result = [create_message_model(m) for m in messages]
+
+    return MessageModel.schema()().jsonify(result, many=True), HTTPStatus.OK
+
+@api_register.route('/messages/<int:user_id>', methods=["GET"])
+@swag_from({
+    'tags': ['Message'],
+    'parameters': [
+        swag_param(PARAM.HEADER, "Authorization", VALUE.INTEGER),
+        swag_param(PARAM.PATH, "user_id", VALUE.INTEGER),
+    ],
+    'responses': {
+        HTTPStatus.OK.value: {
+            'description': 'List messages from user',
+            'schema': {
+                "type": "array",
+                "items": MessageModel.schema()
+            }
+        },
+        404: {
+            'description': 'user_id not found',
+        }
+    }
+})
+@auth_required
+def get_messages_from_user(user_id: int):
     user = current_user()
 
     sent = user.messages_sent.filter(Message.to_user_id == user_id)
