@@ -92,7 +92,7 @@ def get_entries():
 
     before = Entry.query.get(before_id)
     after = Entry.query.get(after_id)
-    subquery = Entry.query.order_by(Entry.created_at.desc()).filter(Entry.reply_id == None)
+    subquery = Entry.query.order_by(Entry.id.desc()).filter(Entry.reply_id == None)
     if before: 
         subquery = subquery.filter(Entry.created_at < before.created_at)
     if after:
@@ -180,7 +180,7 @@ def get_entry_replies(entry_id: int):
     if entry is None:
         return "Entry not found", HTTPStatus.BAD_REQUEST
 
-    result = [create_entry_model(r) for r in entry.replies.order_by(Entry.created_at.desc())]
+    result = [create_entry_model(r) for r in entry.replies.order_by(Entry.id.desc())]
 
     return EntryModel.schema()().jsonify(result, many=True), HTTPStatus.OK
 

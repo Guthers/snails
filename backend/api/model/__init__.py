@@ -1,5 +1,5 @@
 from .entry import EntryModel
-from .message import MessageModel
+from .message import MessageModel, MessageThreadModel
 from .news import NewsModel
 from .user import UserModel, LoginBody, TokenResponse
 from .vehicle import VehicleModel

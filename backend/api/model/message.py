@@ -1,6 +1,7 @@
 from .abstract_model import AbstractModel
 from datetime import datetime
 from api.model.user import UserModel
+from typing import List
 
 
 class MessageModel(AbstractModel):
@@ -25,3 +26,10 @@ class MessageModel(AbstractModel):
         self._from = _from
         self.content = content
         self.message_id = message_id
+
+class MessageThreadModel(AbstractModel):
+    def __init__(self, _from: UserModel = None, to: UserModel = None, 
+                 messages: List[MessageModel] = None):
+        self._from = _from
+        self.to = to
+        self.messages = messages

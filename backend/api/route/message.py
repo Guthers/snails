@@ -11,7 +11,7 @@ from functools import reduce
 
 import flask
 
-from api.model import MessageModel, UserModel
+from api.model import MessageModel, MessageThreadModel, UserModel
 from api.db import db, Message, User 
 from utils.route_utils import swag_param, PARAM, VALUE
 
@@ -40,11 +40,21 @@ def get_messages():
 
     sent = user.messages_sent
     recv = user.messages_recv
-    messages = sent.union(recv).order_by(Message.created_at.desc())
+    messages = sent.union(recv).order_by(Message.id.desc())
 
-    result = [create_message_model(m) for m in messages]
 
-    return MessageModel.schema()().jsonify(result, many=True), HTTPStatus.OK
+    def group_by(xs, x: MessageModel): 
+        to = x.to.user_id if x._from.user_id == user.id else x._from.user_id
+        xs[to].append(x)
+        return xs
+
+    message_models = [create_message_model(m) for m in messages]
+    threads = reduce(group_by, message_models, defaultdict(list))
+
+    result = [MessageThreadModel(_from=user.id, to=k, messages=v) for (k, v) in threads.items()]
+    print(result)
+
+    return MessageThreadModel.schema()().jsonify(result, many=True), HTTPStatus.OK
 
 @api_register.route('/messages/<int:user_id>', methods=["GET"])
 @swag_from({
@@ -72,7 +82,7 @@ def get_messages_from_user(user_id: int):
 
     sent = user.messages_sent.filter(Message.to_user_id == user_id)
     recv = user.messages_recv.filter(Message.from_user_id == user_id)
-    messages = sent.union(recv).order_by(Message.created_at.desc())
+    messages = sent.union(recv).order_by(Message.id.desc())
 
     result = [create_message_model(m) for m in messages]
     
