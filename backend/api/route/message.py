@@ -51,7 +51,7 @@ def get_messages():
     message_models = [create_message_model(m) for m in messages]
     threads = reduce(group_by, message_models, defaultdict(list))
 
-    result = [MessageThreadModel(_from=user.id, to=k, messages=v) for (k, v) in threads.items()]
+    result = [MessageThreadModel(_from=User.query.get(user.id), to=k, messages=User.query.get(v)) for (k, v) in threads.items()]
     print(result)
 
     return MessageThreadModel.schema()().jsonify(result, many=True), HTTPStatus.OK
