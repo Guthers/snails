@@ -14,6 +14,7 @@ from utils.route_utils import swag_param, PARAM, VALUE
     'parameters': [
         swag_param(PARAM.QUERY, "lat", VALUE.STRING),
         swag_param(PARAM.QUERY, "lng", VALUE.STRING)],
+        swag_param(PARAM.QUERY, "ber", VALUE.STRING)],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get a map link',
@@ -22,7 +23,7 @@ from utils.route_utils import swag_param, PARAM, VALUE
     }
 })
 def maps():
-    result = MapModel(request.args["lat"], request.args["lng"])
+    result = MapModel(request.args.get("lat", 0), request.args.get("lng", 0), request.args.get("ber", 0))
     return MapModel.schema()().jsonify(result), HTTPStatus.OK
 
 
@@ -44,7 +45,7 @@ def maps():
 })
 def maps_id():
     # assuming dict with tuple entries (lat, long)
-    boards = {69: (153.013171, -27.497083), 420: (153.014641, -27.499610)}
+    boards = {69: (153.013171, -27.497083, 0), 420: (153.014641, -27.499610, 45)}
     board_id = request.args["board_id"]
     board_id = int(board_id) if board_id.isdigit() else -1
 
