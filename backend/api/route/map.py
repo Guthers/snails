@@ -13,7 +13,7 @@ from utils.route_utils import swag_param, PARAM, VALUE
     'tags': ['Maps'],
     'parameters': [
         swag_param(PARAM.QUERY, "lat", VALUE.STRING),
-        swag_param(PARAM.QUERY, "lng", VALUE.STRING)],
+        swag_param(PARAM.QUERY, "lng", VALUE.STRING),
         swag_param(PARAM.QUERY, "ber", VALUE.STRING)],
     'responses': {
         HTTPStatus.OK.value: {
