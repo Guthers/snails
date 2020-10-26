@@ -16,13 +16,15 @@ const generateQR = async (text: string) => {
 const Entry = (props: Props) => {
   const [qr, setQR] = useState("");
 
+  const { entry_id, content, author } = props.entry
+
   useEffect(() => {
-    generateQR("reddit.com").then(qr => setQR(qr))
+    generateQR(`https://deco3801-the-snails.uqcloud.net/api/entry/${entry_id}`).then(qr => setQR(qr))
   })
 
   return (
     <div className="m-2 p-5 text-2xl font-medium bg-teal-700 flex">
-      <p className="font-bold max-w-xs mr-3">{props.entry.author.name} says {props.entry.content}</p>
+      <p className="font-bold max-w-xs mr-3">{author.name} says {content}</p>
       <div className="flex bg-gray-600 mx-2 self-end">
         <img src={qr} className="self-end max-w-xs" alt="qr code" />
       </div>
