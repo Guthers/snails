@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBarProps } from './Api';
+import { fetchWeather } from './Api';
 
 /**
  * An information bar showing time, date, temperature and weather
@@ -12,7 +12,7 @@ const Bar: React.FC = () => {
   const [weather, setWeather] = useState("");
 
   useEffect(() => {
-    getBarProps().then((response) => {
+    fetchWeather().then((response) => {
       console.log(response);
       response.json().then(data => {
         setTime(data["created_at"].substr(0, 10));

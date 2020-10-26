@@ -29,7 +29,7 @@ const App: React.FC = () => {
         <div className="absolute inset-x-0">
           <Bar />
         </div>
-        <News image="https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2623&q=80" title="Into the Unknown" />
+        <News />
       </Panel>],
     ["c",
       <Panel borderRadius="rounded">
