@@ -10,6 +10,7 @@ of three parts:
 | Frontend Board  | https://github.com/Guthers/snails/tree/master/frontend-board |
 | Frontend Mobile | https://github.com/ldgrp/snails-app                          |
 | Backend         | https://github.com/Guthers/snails/tree/master/backend        |
+| Presentations   | https://github.com/Delmastro/pocketCampus                    |
 
 ## Frontend Board
 
