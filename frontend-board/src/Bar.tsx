@@ -13,7 +13,6 @@ const Bar: React.FC = () => {
 
   useEffect(() => {
     fetchWeather().then((response) => {
-      console.log(response);
       response.json().then(data => {
         setTime(data["created_at"].substr(0, 10));
         setDate(data["created_at"].substr(11));
