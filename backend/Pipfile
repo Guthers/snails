@@ -16,6 +16,7 @@ pymysql = "*"
 uwsgi = "*"
 flask-praetorian = "*"
 gtfslib = "*"
+flask_cors  = "*"
 
 [dev-packages]
 

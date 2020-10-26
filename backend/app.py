@@ -3,6 +3,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flasgger import Swagger
 from argparse import ArgumentParser
+from flask_cors import CORS, cross_origin
+
 
 def create_app():
     app = Flask(__name__)
@@ -34,7 +36,7 @@ def create_app():
     app.config['JWT_ACCESS_LIFESPAN'] = {'hours': 24}
     app.config['JWT_REFRESH_LIFESPAN'] = {'days': 30}
 
-
+    CORS(app)
     return app
 
 
@@ -44,6 +46,7 @@ app = create_app()
 # Then register all the endpoints (which need the app base to be made)
 from api.route import api_register
 app.register_blueprint(api_register, url_prefix='/api')
+
 
 @app.cli.command("populate")
 def populate_db():
@@ -83,8 +86,8 @@ def populate_db():
                    "Will I be able to collect a Student Diary?",
                    "Where can I find academic writing and study skills workshops and seminars?"]
     content_gus = ["How can I find Staff and Student contact details?",
-                    "What is the word limit for a PhD thesis?",
-                    "Best cafe @ UQ?"]
+                   "What is the word limit for a PhD thesis?",
+                   "Best cafe @ UQ?"]
     for cs, u in [(content_amity, user_amity), (content_eda, user_eda), (content_gus, user_gus)]:
         for c in cs:
             row = Entry(reply_id=None, author_id=u.id, content=c, created_at=datetime.now())
@@ -100,7 +103,8 @@ def populate_db():
     # Messages
     db.session.add(Message(content="HAI AMITY!!", from_user_id=user_hooty.id, to_user_id=user_amity.id, created_at=datetime.now()))
     db.session.add(Message(content="Ew. Don't talk to me bird tube.", from_user_id=user_amity.id, to_user_id=user_hooty.id, created_at=datetime.now()))
-    db.session.add(Message(content="Aww that's the best nickname ever been given to me!", from_user_id=user_hooty.id, to_user_id=user_amity.id, created_at=datetime.now()))
+    db.session.add(Message(content="Aww that's the best nickname ever been given to me!",
+                           from_user_id=user_hooty.id, to_user_id=user_amity.id, created_at=datetime.now()))
     db.session.add(Message(content="Dont talk to me again...", from_user_id=user_amity.id, to_user_id=user_hooty.id, created_at=datetime.now()))
     db.session.add(Message(content="I mean it.", from_user_id=user_amity.id, to_user_id=user_hooty.id, created_at=datetime.now()))
     db.session.add(Message(content="Awww, I like you too!", from_user_id=user_hooty.id, to_user_id=user_amity.id, created_at=datetime.now()))
@@ -112,6 +116,7 @@ def populate_db():
     db.session.add(Message(content="Hey kid. Here to see luz? ;)", from_user_id=user_eda.id, to_user_id=user_amity.id, created_at=datetime.now()))
 
     db.session.commit()
+
 
 if __name__ == '__main__':
     parser = ArgumentParser()
