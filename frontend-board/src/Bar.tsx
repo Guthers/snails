@@ -12,15 +12,29 @@ const Bar: React.FC = () => {
   const [weather, setWeather] = useState("")
 
   useEffect(() => {
+    const timer1 = setInterval(() => refresh(), 1000)
+    const timer2 = setInterval(() => poll(), 5000)
+
+    return () => {
+      clearInterval(timer1)
+      clearInterval(timer2)
+    }
+  })
+
+  const refresh = () => {
+    const date = new Date()
+    setTime(date.toLocaleTimeString())
+    setDate(date.toDateString())
+  }
+
+  const poll = () => {
     fetchWeather().then(res => {
-      setTime(res.created_at.substr(0, 10))
-      setDate(res.created_at.substr(11))
       if (res.current_temperature)
         setTemperature(res.current_temperature.toString() ?? "25")
       if (res.conditions)
         setWeather(res.conditions)
     })
-  })
+  }
 
   return (
     <div className="font-black text-3xl font-mono text-center lg:text-left bg-black bg-opacity-50 p-3 px-5 tracking-tight">

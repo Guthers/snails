@@ -34,8 +34,17 @@ const Entries = () => {
   const [items, setItems] = useState<EntryModel[]>([]);
 
   useEffect(() => {
+    const timer1 = setInterval(() => refresh(), 1000)
+
+    return () => {
+      clearInterval(timer1)
+    }
+  })
+
+  const refresh = () => {
     fetchEntries().then(setItems)
-  }, [])
+  }
+
 
   return (
     <div className="flex-grow flex items-start flex-wrap overflow-hidden justify-center">

@@ -25,7 +25,7 @@ export const Panel: React.FC<Props> = (props) => {
       <div className={`h-full relative flex overflow-hidden 
                             ${padding} ${margin} ${background} ${borderRadius}`
                           }>
-        {props?.isEdit?<div className="absolute top-0 right-0 mt-4 mr-4">boo</div>:null}
+        {props?.isEdit?<div className="absolute top-0 right-0 mt-4 mr-4">Editing</div>:null}
         {props.children}
       </div>
   )

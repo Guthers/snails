@@ -17,8 +17,16 @@ const News: React.FC = () => {
   const [items, setItems] = useState<NewsModel[]>(defaultItems);
 
   useEffect(() => {
+    const timer1 = setInterval(() => refresh(), 1000)
+
+    return () => {
+      clearInterval(timer1)
+    }
+  })
+
+  const refresh = () => {
     fetchNews().then(setItems)
-  }, [])
+  }
 
   console.log(items)
 
