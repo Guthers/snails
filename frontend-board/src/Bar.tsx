@@ -7,6 +7,8 @@ type Props = {
   weather: string,
 }
 
+//TODO: Add api call
+
 /**
  * An information bar showing time, date, temperature and weather
  * @param props Props

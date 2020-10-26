@@ -5,6 +5,8 @@ type Props = {
   message: string
 };
 
+//TODO: Add api call
+
 const generateQR = async (text: string) => {
     return await QRCode.toDataURL(text, {margin: 1, errorCorrectionLevel: 'L', width: 100})
 }

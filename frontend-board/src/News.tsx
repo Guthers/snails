@@ -5,6 +5,7 @@ type Props = {
   title: string,
 };
 
+//TODO: Add api call
 function News(props: Props) {
   return (
     <div className="flex flex-grow overflow-hidden bg-cover bg-center p-5 items-end"
