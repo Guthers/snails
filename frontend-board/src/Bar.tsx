@@ -6,20 +6,20 @@ import { fetchWeather } from './Api';
  * @param props Props
  */
 const Bar: React.FC = () => {
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
-  const [temperature, setTemperature] = useState("");
-  const [weather, setWeather] = useState("");
+  const [time, setTime] = useState("")
+  const [date, setDate] = useState("")
+  const [temperature, setTemperature] = useState("")
+  const [weather, setWeather] = useState("")
 
   useEffect(() => {
-    fetchWeather().then((response) => {
-      response.json().then(data => {
-        setTime(data["created_at"].substr(0, 10));
-        setDate(data["created_at"].substr(11));
-        setTemperature(data["current_temperature"] ? data["current_temperature"] : "");
-        setWeather(data["conditions"]);
-      })
-    });
+    fetchWeather().then(res => {
+      setTime(res.created_at.substr(0, 10))
+      setDate(res.created_at.substr(11))
+      if (res.current_temperature)
+        setTemperature(res.current_temperature.toString() ?? "25")
+      if (res.conditions)
+        setWeather(res.conditions)
+    })
   })
 
   return (

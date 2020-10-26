@@ -5,7 +5,7 @@ import Bar from './Bar';
 import Nav from './Nav';
 import News from './News';
 import MapMaze from './MapMaze';
-import Messages from './Message';
+import Entries from './Entry';
 import { Panel } from './Panel';
 
 const App: React.FC = () => {
@@ -33,7 +33,7 @@ const App: React.FC = () => {
       </Panel>],
     ["c",
       <Panel borderRadius="rounded">
-        <Messages />
+        <Entries />
       </Panel>],
     ["d",
       <Panel borderRadius="rounded">

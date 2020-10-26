@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { fetchEntries } from './Api';
+import { EntryModel } from './models';
 
 type Props = {
-  message: string
+  entry: EntryModel
 };
 
 //TODO: Add api call
@@ -12,7 +13,7 @@ const generateQR = async (text: string) => {
   return await QRCode.toDataURL(text, { margin: 1, errorCorrectionLevel: 'L', width: 100 })
 }
 
-function Message(props: Props) {
+const Entry = (props: Props) => {
   const [qr, setQR] = useState("");
 
   useEffect(() => {
@@ -21,7 +22,7 @@ function Message(props: Props) {
 
   return (
     <div className="m-2 p-5 text-2xl font-medium bg-teal-700 flex">
-      <p className="font-bold max-w-xs mr-3">{props.message}</p>
+      <p className="font-bold max-w-xs mr-3">{props.entry.author.name} says {props.entry.content}</p>
       <div className="flex bg-gray-600 mx-2 self-end">
         <img src={qr} className="self-end max-w-xs" alt="qr code" />
       </div>
@@ -29,27 +30,18 @@ function Message(props: Props) {
   );
 }
 
-const Messages: React.FC = () => {
-  const defaultItems: string[] = [];
-  const [items, setItems] = useState(defaultItems);
+const Entries = () => {
+  const [items, setItems] = useState<EntryModel[]>([]);
 
   useEffect(() => {
-    fetchEntries().then(response => {
-      response.json().then(data => {
-        var newItems: string[] = [];
-        data.forEach((entry: { [x: string]: any }) => {
-          newItems.push(`${entry["author"]["name"]} says '${entry["content"]}'`)
-        });
-        setItems(newItems);
-      })
-    })
-  })
+    fetchEntries().then(setItems)
+  }, [])
 
   return (
     <div className="flex-grow flex items-start flex-wrap overflow-hidden justify-center">
-      {items.map(item => <Message message={item} />)}
+      {items.map(item => <Entry entry={item} />)}
     </div>
   )
 }
 
-export default Messages;
+export default Entries;
