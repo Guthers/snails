@@ -60,6 +60,7 @@ def login():
 def register():
     username = request.get_json(force=True).get('username', None)
     password = request.get_json(force=True).get('password', None)
+    name = request.get_json(force=True).get('name', None)
 
     exists = User.lookup(username) is not None
 
@@ -67,6 +68,7 @@ def register():
         return "User already exists", HTTPStatus.CONFLICT
     user = User(username=username,
                 password=guard.hash_password(password),
+                name=name,
                 created_at=datetime.now())
     db.session.add(user)
     db.session.commit()
