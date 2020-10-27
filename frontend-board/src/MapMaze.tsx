@@ -1,5 +1,7 @@
 import React, { useRef, useState, useLayoutEffect } from 'react';
 
+//TODO: Add api call
+
 const MapMaze: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
