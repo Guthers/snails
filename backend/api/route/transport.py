@@ -25,7 +25,6 @@ QUEUE_SIZE = 10
 
 @lru_cache(maxsize=1)
 def start_server():
-    print('starting server')
     threading.Thread(target=transport_server).start()
 
 @api_register.route('/transport-lakes', methods=["GET"])
@@ -43,9 +42,7 @@ def transport_lakes():
     if not init_lock:
         start_server()
 
-    print('to serve')
     while not init_lock: pass
-    print('served')
     
     lakes_queue_lock.acquire()
     result = lakes_queue.copy()
@@ -75,9 +72,7 @@ def transport_lakes_id(transportID: int):
     if not init_lock:
         start_server()
 
-    print('to serve')
     while not init_lock: pass
-    print('served')
 
     lakes_queue_lock.acquire()
     result = lakes_queue[min(transportID, len(lakes_queue) - 1)]
@@ -99,9 +94,7 @@ def transport_chancellors():
     if not init_lock:
         start_server()
 
-    print('to serve')
     while not init_lock: pass
-    print('served')
     
     chancellors_queue_lock.acquire()
     result = chancellors_queue.copy()
@@ -131,9 +124,7 @@ def transport_chancellors_id(transportID: int):
     if not init_lock:
         start_server()
 
-    print('to serve')
     while not init_lock: pass
-    print('served')
 
     chancellors_queue_lock.acquire()
     result = chancellors_queue[min(transportID, len(lakes_queue) - 1)]
@@ -142,33 +133,32 @@ def transport_chancellors_id(transportID: int):
 
 rightnow = lambda: time.time() // 1
 thismin = lambda: rightnow() // 60
+minsintotoday = lambda: thismin() % (24 * 60)
 today = lambda: thismin() // 60 // 24
+todayinmins = lambda: thismin() // 60 // 24
 
 @lru_cache(maxsize=1)
 def get_timetable():
     with open("uq_gtfs.sqlite", 'rb') as f, open('-uq_gtfs.sqlite', 'wb') as g:
-        print('copying')
         block = f.read(2**15)
         while block:
             g.write(block)
             block = f.read(2**15)
 
-    print('done copying')
-    print('Dao')
     result = Dao('-uq_gtfs.sqlite')
-    print('done Dao')
     return result
 
 def buses_by_min(stops, minute):
+    minute_into_day = minute % (24 * 60)
     tt = get_timetable()
     buses = []
     for s in stops:
         for st in tt.stoptimes(fltr=((StopTime.stop == s) &
-                (StopTime.departure_time >= minute * 60) &
-                (StopTime.departure_time < (minute + 1) * 60))):
+                (StopTime.departure_time >= minute_into_day * 60 ) &
+                (StopTime.departure_time < (minute_into_day + 1) * 60))):
             sttrip = next(t for t in tt.trips(fltr=(Trip.trip_id == st.trip_id)))
             stroute = next(r for r in tt.routes(fltr=(Route.route_id == sttrip.route_id)))
-            buses.append({'eta': minute + today() * 60 * 60 * 24,
+            buses.append({'eta': minute * 60,
                           'name': stroute.route_long_name,
                           'code': stroute.route_short_name})
 
@@ -180,7 +170,6 @@ def transport_server():
 
     tt = get_timetable()
 
-    next_min = thismin() % (24 * 60)
     s = next(tt.stops())
     lakes_stops = {s for s in tt.stops() if s.parent_station_id == 'place_UQLAKE'}
     chancellors_stops = {s for s in tt.stops() if s.parent_station_id == 'place_INTUQ'}
@@ -188,7 +177,7 @@ def transport_server():
 
     while True:
         lakes_queue_lock.acquire()
-        print('deleting old buses')
+        next_min = time.time() // 60
         to_del = []
         for i in range(len(lakes_queue)):
             if lakes_queue[i]['eta'] <= thismin() * 60:
@@ -202,13 +191,10 @@ def transport_server():
         while len(lakes_queue) < QUEUE_SIZE:
             lakes_queue.extend(buses_by_min(lakes_stops, next_min))
             next_min += 1
-            next_min %= 60 * 24
 
-        init_lock = True
-
+        next_min = time.time() // 60
         lakes_queue_lock.release()
         chancellors_queue_lock.acquire()
-        print('deleting old buses')
         to_del = []
         for i in range(len(chancellors_queue)):
             if chancellors_queue[i]['eta'] <= thismin() * 60:
@@ -222,7 +208,6 @@ def transport_server():
         while len(chancellors_queue) < QUEUE_SIZE:
             chancellors_queue.extend(buses_by_min(chancellors_stops, next_min))
             next_min += 1
-            next_min %= 60 * 24
 
         init_lock = True
 

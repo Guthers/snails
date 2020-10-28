@@ -5,12 +5,17 @@
 instance/*
 !instance/.gitignore
 .webassets-cache
+Pipfile.lock
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Tranport  
+-uq_gtfs.sqlite
+
 
 # C extensions
 *.so
