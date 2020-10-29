@@ -1,33 +1,62 @@
 from .api_register import api_register
 
-from http import HTTPStatus
-import flask
+from apscheduler.schedulers.background import BackgroundScheduler
 from flasgger import swag_from
+from google.transit import gtfs_realtime_pb2
+from http import HTTPStatus
+from threading import Lock
+from urllib import request
+
 from api.model import VehicleModel
 from utils.route_utils import swag_param, PARAM, VALUE
-import api.model as models
-from .api_register import api_register
-from gtfslib.dao import Dao
-from functools import lru_cache
 
-from gtfslib.model import *
-import datetime
-import time
-import threading
+import flask
 
-lakes_queue = []
-lakes_queue_lock = threading.Lock()
-chancellors_queue = []
-chancellors_queue_lock = threading.Lock()
-init_lock = False
 
-QUEUE_SIZE = 10
+lakes = []
+chancellors = []
+lock = Lock()
 
-@lru_cache(maxsize=1)
-def start_server():
-    threading.Thread(target=transport_server).start()
 
-@api_register.route('/transport-lakes', methods=["GET"])
+def retrieve_feed():
+    with lock:
+        global lakes, chancellors
+        feed = gtfs_realtime_pb2.FeedMessage()
+        response = request.urlopen('https://gtfsrt.api.translink.com.au/api/realtime/SEQ')
+        feed.ParseFromString(response.read())
+
+        CHANCELLORS_ROUTE_IDS = ["402","411","412","414","427","428","432"]
+        LAKES_ROUTE_IDS = ["139","169","192","209","28","29","66","P332"]
+
+        LAKES_STOP_IDS = ["1882","1853","1877","1878","1880","1883"]
+
+        CHANCELLORS_STOP_IDS = ["1801","1799","1798","1797","1802"]
+
+        for entity in feed.entity:
+          if entity.HasField('trip_update'):
+
+            trip_update = entity.trip_update
+
+            route_id = trip_update.trip.route_id.split('-')[0]
+            
+            lakes_stop = next(filter(lambda stu: stu.stop_id in LAKES_STOP_IDS, trip_update.stop_time_update), None)
+            chancellors_stop = next(filter(lambda stu: stu.stop_id in CHANCELLORS_STOP_IDS, trip_update.stop_time_update), None)
+
+            if lakes_stop:
+              lakes.append(VehicleModel(code=route_id, 
+                                        name=route_id, 
+                                        eta=lakes_stop.departure.time))
+
+            if chancellors_stop:
+              chancellors.append(VehicleModel(code=route_id, 
+                                        name=route_id, 
+                                        eta=chancellors_stop.departure.time))
+
+        lakes = sorted(lakes, key=lambda x: x.eta)
+        chancellors = sorted(chancellors, key=lambda x: x.eta)
+
+
+@api_register.route('/transport/lakes', methods=["GET"])
 @swag_from({
     'tags': ['Transport'],
     'responses': {
@@ -38,27 +67,15 @@ def start_server():
     }
 })
 def transport_lakes():
-    global init_lock
-    if not init_lock:
-        start_server()
-
-    while not init_lock: pass
-    
-    lakes_queue_lock.acquire()
-    result = lakes_queue.copy()
-    lakes_queue_lock.release()
-
-    return flask.json.jsonify(result), 200
-
-    result = VehicleModel()
-    return VehicleModel.schema()().jsonify(result), 200
+    with lock:
+        return VehicleModel.schema()().jsonify(lakes, many=True), HTTPStatus.OK
 
 
-@api_register.route('/transport-lakes/<int:transportID>', methods=["GET"])
+@api_register.route('/transport/lakes/<string:code>', methods=["GET"])
 @swag_from({
     'tags': ['Transport'],
     'parameters': [
-        swag_param(PARAM.PATH, "transport_id", VALUE.INTEGER)
+        swag_param(PARAM.PATH, "code", VALUE.STRING)
     ],
     'responses': {
         HTTPStatus.OK.value: {
@@ -67,19 +84,12 @@ def transport_lakes():
         }
     }
 })
-def transport_lakes_id(transportID: int):
-    global init_lock
-    if not init_lock:
-        start_server()
+def transport_lakes_id(code: str):
+    with lock:
+        result = list(filter(lambda x: x[1] == code, lakes))
+        return VehicleModel.schema()().jsonify(result, many=True), HTTPStatus.OK
 
-    while not init_lock: pass
-
-    lakes_queue_lock.acquire()
-    result = lakes_queue[min(transportID, len(lakes_queue) - 1)]
-    lakes_queue_lock.release()
-    return VehicleModel.schema()().jsonify(result), 200
-
-@api_register.route('/transport-chancellors', methods=["GET"])
+@api_register.route('/transport/chancellors', methods=["GET"])
 @swag_from({
     'tags': ['Transport'],
     'responses': {
@@ -90,126 +100,30 @@ def transport_lakes_id(transportID: int):
     }
 })
 def transport_chancellors():
-    global init_lock
-    if not init_lock:
-        start_server()
-
-    while not init_lock: pass
-    
-    chancellors_queue_lock.acquire()
-    result = chancellors_queue.copy()
-    chancellors_queue_lock.release()
-
-    return flask.json.jsonify(result), 200
-
-    result = VehicleModel()
-    return VehicleModel.schema()().jsonify(result), 200
+    with lock:
+        return VehicleModel.schema()().jsonify(chancellors, many=True), HTTPStatus.OK
 
 
-@api_register.route('/transport-chancellors/<int:transportID>', methods=["GET"])
+@api_register.route('/transport/chancellors/<string:code>', methods=["GET"])
 @swag_from({
     'tags': ['Transport'],
     'parameters': [
-        swag_param(PARAM.PATH, "transport_id", VALUE.INTEGER)
+        swag_param(PARAM.PATH, "code", VALUE.STRING)
     ],
     'responses': {
         HTTPStatus.OK.value: {
             'description': 'Get an individual transport item',
-            'schema': models.VehicleModel.schema()
+            'schema': VehicleModel.schema()
         }
     }
 })
-def transport_chancellors_id(transportID: int):
-    global init_lock
-    if not init_lock:
-        start_server()
+def transport_chancellors_id(code: str):
+    with lock:
+        result = list(filter(lambda x: x[1] == code, chancellors))
+        return VehicleModel.schema()().jsonify(result, many=True), HTTPStatus.OK
 
-    while not init_lock: pass
+scheduler = BackgroundScheduler()
+job = scheduler.add_job(retrieve_feed, 'interval', seconds=30)
+scheduler.start()
 
-    chancellors_queue_lock.acquire()
-    result = chancellors_queue[min(transportID, len(lakes_queue) - 1)]
-    chancellors_queue_lock.release()
-    return models.VehicleModel.schema()().jsonify(result), 200
-
-rightnow = lambda: time.time() // 1
-thismin = lambda: rightnow() // 60
-minsintotoday = lambda: thismin() % (24 * 60)
-today = lambda: thismin() // 60 // 24
-todayinmins = lambda: thismin() // 60 // 24
-
-@lru_cache(maxsize=1)
-def get_timetable():
-    with open("uq_gtfs.sqlite", 'rb') as f, open('-uq_gtfs.sqlite', 'wb') as g:
-        block = f.read(2**15)
-        while block:
-            g.write(block)
-            block = f.read(2**15)
-
-    result = Dao('-uq_gtfs.sqlite')
-    return result
-
-def buses_by_min(stops, minute):
-    minute_into_day = minute % (24 * 60)
-    tt = get_timetable()
-    buses = []
-    for s in stops:
-        for st in tt.stoptimes(fltr=((StopTime.stop == s) &
-                (StopTime.departure_time >= minute_into_day * 60 ) &
-                (StopTime.departure_time < (minute_into_day + 1) * 60))):
-            sttrip = next(t for t in tt.trips(fltr=(Trip.trip_id == st.trip_id)))
-            stroute = next(r for r in tt.routes(fltr=(Route.route_id == sttrip.route_id)))
-            buses.append({'eta': minute * 60,
-                          'name': stroute.route_long_name,
-                          'code': stroute.route_short_name})
-
-    return buses
-
-
-def transport_server():
-    global init_lock
-
-    tt = get_timetable()
-
-    s = next(tt.stops())
-    lakes_stops = {s for s in tt.stops() if s.parent_station_id == 'place_UQLAKE'}
-    chancellors_stops = {s for s in tt.stops() if s.parent_station_id == 'place_INTUQ'}
-    time.sleep(10)
-
-    while True:
-        lakes_queue_lock.acquire()
-        next_min = time.time() // 60
-        to_del = []
-        for i in range(len(lakes_queue)):
-            if lakes_queue[i]['eta'] <= thismin() * 60:
-                to_del.append(i)
-            else:
-                break
-
-        for i,j in enumerate(to_del):
-            del lakes_queue[j - i]
-
-        while len(lakes_queue) < QUEUE_SIZE:
-            lakes_queue.extend(buses_by_min(lakes_stops, next_min))
-            next_min += 1
-
-        next_min = time.time() // 60
-        lakes_queue_lock.release()
-        chancellors_queue_lock.acquire()
-        to_del = []
-        for i in range(len(chancellors_queue)):
-            if chancellors_queue[i]['eta'] <= thismin() * 60:
-                to_del.append(i)
-            else:
-                break
-
-        for i,j in enumerate(to_del):
-            del chancellors_queue[j - i]
-
-        while len(chancellors_queue) < QUEUE_SIZE:
-            chancellors_queue.extend(buses_by_min(chancellors_stops, next_min))
-            next_min += 1
-
-        init_lock = True
-
-        chancellors_queue_lock.release()
-        time.sleep(60)
+retrieve_feed()

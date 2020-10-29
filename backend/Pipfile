@@ -15,8 +15,8 @@ marshmallow-sqlalchemy = "*"
 pymysql = "*"
 uwsgi = "*"
 flask-praetorian = "*"
-gtfslib = "*"
 flask_cors  = "*"
+gtfs-realtime-bindings = "*"
 
 [dev-packages]
 
