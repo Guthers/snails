@@ -41,7 +41,7 @@ const Entries = () => {
     return () => {
       clearInterval(timer1)
     }
-  })
+  }, [])
 
   const refresh = () => {
     fetchEntries().then(setItems)
@@ -50,7 +50,7 @@ const Entries = () => {
 
   return (
     <div className="flex-grow flex items-start flex-wrap overflow-hidden justify-center">
-      {items.map(item => <Entry entry={item} />)}
+      {items.map(item => <Entry entry={item} key={item.entry_id} />)}
     </div>
   )
 }

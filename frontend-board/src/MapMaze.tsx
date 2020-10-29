@@ -9,15 +9,14 @@ const MapMaze: React.FC = () => {
 
   useLayoutEffect(() => {
     if(ref.current) {
-      setHeight(ref.current.clientHeight);
-      setWidth(ref.current.clientWidth);
-      console.log(width + " " + height)
+      setHeight(ref.current.clientHeight)
+      setWidth(ref.current.clientWidth)
     }
 
     const handleWindowResize = () => {
       if(ref.current) {
-        setHeight(ref.current.clientHeight);
-        setWidth(ref.current.clientWidth);
+        setHeight(ref.current.clientHeight)
+        setWidth(ref.current.clientWidth)
       }
     };
 
@@ -51,7 +50,6 @@ export const Discord: React.FC = () => {
     if(ref.current) {
       setHeight(ref.current.clientHeight);
       setWidth(ref.current.clientWidth);
-      console.log(width + " " + height)
     }
 
     const handleWindowResize = () => {

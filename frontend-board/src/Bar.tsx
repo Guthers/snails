@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isConditionalExpression } from 'typescript';
 import { fetchWeather } from './Api';
 
 /**
@@ -12,6 +13,9 @@ const Bar: React.FC = () => {
   const [weather, setWeather] = useState("")
 
   useEffect(() => {
+    refresh()
+    poll()
+
     const timer1 = setInterval(() => refresh(), 1000)
     const timer2 = setInterval(() => poll(), 5000)
 
@@ -19,7 +23,7 @@ const Bar: React.FC = () => {
       clearInterval(timer1)
       clearInterval(timer2)
     }
-  })
+  }, [])
 
   const refresh = () => {
     const date = new Date()
@@ -29,11 +33,33 @@ const Bar: React.FC = () => {
 
   const poll = () => {
     fetchWeather().then(res => {
+      console.log(res)
       if (res.current_temperature)
         setTemperature(res.current_temperature.toString() ?? "25")
       if (res.conditions)
-        setWeather(res.conditions)
-    })
+        setWeather(weatherToEmoji(res.conditions))
+    }).catch(res => console.log(res))
+  }
+
+  const weatherToEmoji = (conditions: string) => {
+    const contains = (x: string) => conditions.toLowerCase().includes(x)
+    if (contains("clear") || contains("sunny")) {
+      return "☀️"
+    } else if (contains("rain") || contains("showers")) {
+      return "🌧️"
+    } else if (contains("cloudy")) {
+      return "☁️"
+    } else if (contains("fog") || contains("haze")) {
+      return "🌫️"
+    } else if (contains("frost") || contains("snow")) {
+      return "🌨️"
+    } else if (contains("cyclone") || contains("storm")) {
+      return "🌩️"
+    } else if (contains("wind")) {
+      return "🌬️"
+    } else {
+      return "☀️"
+    }
   }
 
   return (
