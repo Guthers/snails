@@ -63,11 +63,15 @@ const Bar: React.FC = () => {
   }
 
   return (
-    <div className="font-black text-3xl font-mono text-center lg:text-left bg-black bg-opacity-50 p-3 px-5 tracking-tight">
-      <span className="mr-6">{time}</span>
-      <span className="mr-6">{date}</span>
-      <span className="mr-6">{temperature}</span>
-      <span className="mr-6">{weather}</span>
+    <div className="flex font-black text-3xl justify-center lg:justify-between font-mono bg-black bg-opacity-50 p-3 px-5 tracking-tight">
+      <div>
+        <span className="mr-6">{time}</span>
+        <span className="mr-6">{date}</span>
+      </div>
+      <div>
+        <span className="ml-6">{temperature}°C</span>
+        <span className="ml-6">{weather}</span>
+      </div>
     </div>
   );
 }

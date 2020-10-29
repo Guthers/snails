@@ -38,3 +38,9 @@ export interface UserModel {
   username: string
   user_id: UserId
 }
+
+export interface VehicleModel {
+  code: string
+  name: string
+  eta: number
+}

@@ -1,4 +1,4 @@
-import { EntryModel, NewsModel, WeatherModel } from "./models";
+import { EntryModel, NewsModel, VehicleModel, WeatherModel } from "./models";
 
 export const API_BASE = "https://deco3801-the-snails.uqcloud.net/api/";
 
@@ -16,4 +16,12 @@ export const fetchWeather = () : Promise<WeatherModel> =>
 
 export const fetchEntries = () : Promise<EntryModel[]> => 
   fetch(getEndpoint("entries"))
+    .then(response => response.json())
+
+export const fetchLakes = () : Promise<VehicleModel[]> => 
+  fetch(getEndpoint("transport/lakes"))
+    .then(response => response.json())
+
+export const fetchChancellors = () : Promise<VehicleModel[]> => 
+  fetch(getEndpoint("transport/chancellors"))
     .then(response => response.json())
