@@ -6,6 +6,7 @@ from google.transit import gtfs_realtime_pb2
 from http import HTTPStatus
 from threading import Lock
 from urllib import request
+from datetime import datetime
 
 from api.model import VehicleModel
 from utils.route_utils import swag_param, PARAM, VALUE
@@ -34,6 +35,8 @@ def retrieve_feed():
         lakes = []
         chancellors = []
 
+        now = int(datetime.utcnow().timestamp())
+
 
         for entity in feed.entity:
           if entity.HasField('trip_update'):
@@ -45,12 +48,14 @@ def retrieve_feed():
             lakes_stop = next(filter(lambda stu: stu.stop_id in LAKES_STOP_IDS, trip_update.stop_time_update), None)
             chancellors_stop = next(filter(lambda stu: stu.stop_id in CHANCELLORS_STOP_IDS, trip_update.stop_time_update), None)
 
-            if lakes_stop:
+            if lakes_stop and \
+                    (lakes_stop.departure.time >= now):
               lakes.append(VehicleModel(code=route_id, 
                                         name=route_id, 
                                         eta=lakes_stop.departure.time))
 
-            if chancellors_stop:
+            if chancellors_stop and \
+                    (chancellors_stop.departure.time >= now):
               chancellors.append(VehicleModel(code=route_id, 
                                         name=route_id, 
                                         eta=chancellors_stop.departure.time))
@@ -70,6 +75,7 @@ def retrieve_feed():
     }
 })
 def transport_lakes():
+    retrieve_feed()
     with lock:
         return VehicleModel.schema()().jsonify(lakes, many=True), HTTPStatus.OK
 
@@ -88,6 +94,7 @@ def transport_lakes():
     }
 })
 def transport_lakes_id(code: str):
+    retrieve_feed()
     with lock:
         result = list(filter(lambda x: x[1] == code, lakes))
         return VehicleModel.schema()().jsonify(result, many=True), HTTPStatus.OK
@@ -103,6 +110,7 @@ def transport_lakes_id(code: str):
     }
 })
 def transport_chancellors():
+    retrieve_feed()
     with lock:
         return VehicleModel.schema()().jsonify(chancellors, many=True), HTTPStatus.OK
 
@@ -121,12 +129,13 @@ def transport_chancellors():
     }
 })
 def transport_chancellors_id(code: str):
+    retrieve_feed()
     with lock:
         result = list(filter(lambda x: x[1] == code, chancellors))
         return VehicleModel.schema()().jsonify(result, many=True), HTTPStatus.OK
 
-scheduler = BackgroundScheduler()
-job = scheduler.add_job(retrieve_feed, 'interval', seconds=30)
-scheduler.start()
-
-retrieve_feed()
+#scheduler = BackgroundScheduler()
+#job = scheduler.add_job(retrieve_feed, 'interval', seconds=30)
+#scheduler.start()
+#
+#retrieve_feed()
