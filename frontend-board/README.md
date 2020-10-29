@@ -46,3 +46,10 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+# Deploy
+
+Clone this directory and run `deploy.sh`.
+
+Alternatively, simply `ssh` into the box and
+run the same command at `/home/s4529551/deploy-frontend.sh`
