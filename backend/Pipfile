@@ -18,6 +18,7 @@ flask-praetorian = "*"
 flask_cors  = "*"
 gtfs-realtime-bindings = "*"
 apscheduler = "*"
+bs4 = "*"
 
 [dev-packages]
 
