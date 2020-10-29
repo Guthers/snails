@@ -12,6 +12,11 @@ from utils.route_utils import swag_param, PARAM, VALUE
 
 import flask
 
+CHANCELLORS_ROUTE_IDS = ["402","411","412","414","427","428","432"]
+LAKES_ROUTE_IDS = ["139","169","192","209","28","29","66","P332"]
+
+LAKES_STOP_IDS = ["1882","1853","1877","1878","1880","1883"]
+CHANCELLORS_STOP_IDS = ["1801","1799","1798","1797","1802"]
 
 lakes = []
 chancellors = []
@@ -21,16 +26,14 @@ lock = Lock()
 def retrieve_feed():
     with lock:
         global lakes, chancellors
+
         feed = gtfs_realtime_pb2.FeedMessage()
         response = request.urlopen('https://gtfsrt.api.translink.com.au/api/realtime/SEQ')
         feed.ParseFromString(response.read())
 
-        CHANCELLORS_ROUTE_IDS = ["402","411","412","414","427","428","432"]
-        LAKES_ROUTE_IDS = ["139","169","192","209","28","29","66","P332"]
+        lakes = []
+        chancellors = []
 
-        LAKES_STOP_IDS = ["1882","1853","1877","1878","1880","1883"]
-
-        CHANCELLORS_STOP_IDS = ["1801","1799","1798","1797","1802"]
 
         for entity in feed.entity:
           if entity.HasField('trip_update'):
