@@ -39,10 +39,6 @@ const App: React.FC = () => {
       <Panel borderRadius="rounded">
         <MapMaze />
       </Panel>],
-    ["e",
-      <Panel borderRadius="rounded">
-      </Panel>
-    ]
   ]);
 
   return (

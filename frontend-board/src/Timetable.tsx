@@ -1,9 +1,6 @@
 import React, { useState, useRef, useLayoutEffect, cloneElement, Children, isValidElement, useEffect } from 'react';
 import { fetchChancellors, fetchLakes } from './Api';
-import {LAKES, CHANCELLORS} from './data';
 import { VehicleModel } from './models';
-
-//TODO: Add api call
 
 const Timetable: React.FC = () => {
 
