@@ -17,6 +17,7 @@ uwsgi = "*"
 flask-praetorian = "*"
 flask_cors  = "*"
 gtfs-realtime-bindings = "*"
+apscheduler = "*"
 
 [dev-packages]
 
