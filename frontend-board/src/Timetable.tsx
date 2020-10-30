@@ -9,7 +9,7 @@ const Timetable: React.FC = () => {
 
 
   useEffect(() => {
-    const timer1 = setInterval(() => poll(), 1000)
+    const timer1 = setInterval(() => poll(), 30000)
     return () => {
       clearInterval(timer1)
     }
