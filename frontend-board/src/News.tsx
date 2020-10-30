@@ -29,7 +29,6 @@ const News: React.FC = () => {
       clearInterval(timer2)
     }
   }, [])
-  console.log(activeItem)
 
   const refresh = () => {
     fetchNews().then(setItems)
@@ -42,7 +41,7 @@ const News: React.FC = () => {
         backgroundColor: '#ddd', 
         backgroundBlendMode: 'multiply' }}
     >
-      <h1 className="font-black text-6xl tracking-tight text-shadow-md">{items[activeItem].title}</h1>
+      <h1 className="font-black text-6xl tracking-tight text-shadow-md">{items[activeItem] && items[activeItem].title ? items[activeItem].title : "Into The Unknown"}</h1>
     </div>
   )
 }
