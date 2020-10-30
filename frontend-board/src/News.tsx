@@ -38,7 +38,7 @@ const News: React.FC = () => {
   return (
     <div className="flex flex-grow overflow-hidden bg-cover bg-center p-5 items-end"
       style={{ 
-        backgroundImage: `url('${items[activeItem].image_url ?? default_img}')`, 
+        backgroundImage: `url('${items && items[activeItem] && items[activeItem].image_url ? items[activeItem].image_url : default_img}')`, 
         backgroundColor: '#ddd', 
         backgroundBlendMode: 'multiply' }}
     >
